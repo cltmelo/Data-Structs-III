@@ -83,5 +83,5 @@ void atualizaCabecalho(Registro* registro, Cabecalho* cabecalho);
 
 // Função para imprimir o registro de dados
 void printRegister(Registro *registro);
-
+void removeLixo(char *str, int tamanho);
 #endif // REGISTEROPERATIONS_H_INCLUDED
