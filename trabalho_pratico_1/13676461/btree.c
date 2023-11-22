@@ -93,10 +93,9 @@ void read_node(FILE* indice, Node *no, int RRN){
 }
 
 int Busca(FILE* indice, char *chave, int RRN) {
-    printf("Buscando...");
     Node no;
     read_node(indice, &no, RRN); // Implemente a função de leitura do nó do disco
-    long i = 0;
+    int i = 0;
     while (i < no.nroChavesNo && strcmp(chave, no.C[i]) > 0) {
         i++;
     }
@@ -104,10 +103,14 @@ int Busca(FILE* indice, char *chave, int RRN) {
         // A chave está presente na árvore
         return 1;
     }
-    if (no.P[i] != -1 && strcmp(chave, no.C[i]) < 0) {
-        Busca(indice, no.P[i], chave);
+    int cmp = strcmp(chave, no.C[i]);
+    if (strlen(no.C[i]) == 0){
+        cmp = -1;
+    }
+    if (no.P[i] != -1 && cmp < 0) {
+        Busca(indice, chave, no.P[i]);
     } else if (no.P[i + 1] != -1) {
-        Busca(indice, no.P[i+1], chave);
+        Busca(indice, chave, no.P[i+1]);
     } else {
         // A chave não está presente na árvore
         return 0;

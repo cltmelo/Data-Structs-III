@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "btree.h"
 #include "binaryoperations.h"
 #include "registeropertions.h"
 #include "funcoesFornecidas.h"
@@ -17,7 +18,7 @@
 
 
 int main(){
-    int comando;
+    /*int comando;
     scanf("%d", &comando);
 
     switch (comando)
@@ -37,6 +38,11 @@ int main(){
     
     default:
         printf("Comando inexistente.\n");
-    }
+    }*/
+
+    btree_header bHeader;
+    FILE* indice = abrirArquivoLeitura("indice1.bin");
+    bHeader = LerHeader(indice);
+    Busca(indice, "C#XAMARIN", bHeader.noRaiz);
     return 0;
 }

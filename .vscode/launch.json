@@ -8,13 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-<<<<<<< Updated upstream
-      "cwd": ".",
-      "program": "build/Debug/outDebug",
-=======
-      "cwd": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_pratico_1/13676461",
-      "program": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_pratico_1/13676461/build/Debug/outDebug",
->>>>>>> Stashed changes
+      "cwd": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_introdutorio",
+      "program": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_introdutorio/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
@@ -24,32 +19,6 @@
           "ignoreFailures": true
         }
       ]
-    },
-    {
-      "name": "C/C++: gcc Compilar e depurar o arquivo ativo",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${fileDirname}/${fileBasenameNoExtension}",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${fileDirname}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
-        {
-          "description": "Habilitar a reformatação automática para gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        },
-        {
-          "description": "Definir Tipo de Desmontagem como Intel",
-          "text": "-gdb-set disassembly-flavor intel",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "C/C++: gcc arquivo de build ativo",
-      "miDebuggerPath": "/usr/bin/gdb"
     }
   ]
 }
