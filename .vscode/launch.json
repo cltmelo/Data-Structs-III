@@ -8,8 +8,13 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
+<<<<<<< Updated upstream
       "cwd": ".",
       "program": "build/Debug/outDebug",
+=======
+      "cwd": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_pratico_1/13676461",
+      "program": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_pratico_1/13676461/build/Debug/outDebug",
+>>>>>>> Stashed changes
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

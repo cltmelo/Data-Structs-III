@@ -28,7 +28,7 @@ void libera_lista(Lista* li);
 void insere_lista_final(Lista *li, data *x);
 int tamanho_lista(Lista* li);
 void imprimeLista(Lista* li);
-char* concat_string(Registro *reg);
+
 
 
 int byte_offset(int RRN); //retorna o byte offset de um registros

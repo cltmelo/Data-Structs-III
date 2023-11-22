@@ -56,16 +56,6 @@ Registro* inicializarRegistro(){
     return r;
 }
 
-void removeLixo(char *str, int tamanho) {
-    // Encontrar a posição do primeiro caractere de lixo ('$')
-    int pos = 0;
-    while (pos < tamanho && str[pos] != '$') {
-        pos++;
-    }
-    strncpy(str, str, pos);
-    str[pos] = '\0';
-}
-
 Cabecalho* inicializarCabecalho(){
     Cabecalho* cabecalho = malloc(sizeof(Cabecalho));
     cabecalho->status = '0'; 

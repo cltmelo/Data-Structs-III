@@ -196,15 +196,6 @@ Registro* separaString(const char* Linha){
     return registro;
 }
 
-
-// Funcao para concatenar Strings Tec. Origem e Destino
-char* concat_string(Registro *reg){
-    char result[reg->tecnologiaOrigem.tamanho + reg->tecnologiaDestino.tamanho];
-    strcpy(result, reg->tecnologiaOrigem.string);
-    strcat(result, reg->tecnologiaDestino.string);
-    return result; // return dando erro na hora de retornar string
-}
-
 /*
 -------------------------------------------------------------------------------------
 */
