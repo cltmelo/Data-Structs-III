@@ -14,12 +14,11 @@
 #include "registeropertions.h"
 #include "funcoesFornecidas.h"
 #include "funcoesAuxiliares.h"
-
+#include "btree.h"
 
 int main(){
     int comando;
-    scanf("%d", &comando);
-
+    /*scanf("%d", &comando);
     switch (comando)
     {
     case 1:
@@ -34,9 +33,16 @@ int main(){
     case 4:
         buscarRRN();
         break;
-    
+    case 5:
     default:
+        
         printf("Comando inexistente.\n");
-    }
+    }*/
+    Node no;
+    FILE* arquivo = abrirArquivoLeitura("indice1.bin");
+    btree_header bHeader = LerHeader(arquivo);
+    Busca(arquivo, ".NETASP.NET", bHeader.noRaiz);
+
+
     return 0;
 }
