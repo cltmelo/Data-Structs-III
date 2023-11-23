@@ -1,2 +1,0 @@
-
-void binarioNaTela(char *nomeArquivoBinario);
