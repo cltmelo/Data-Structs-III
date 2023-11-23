@@ -16,9 +16,12 @@
 // Caractere padrão para o preenchimento de bytes vazios no registro
 #define LIXO '$'
 
-// Caracteres padrão para remoção lógica
+// Caracteres padrão para remoção lógica + consistencia
 #define REMOVIDO '1'
 #define NAO_REMOVIDO '0'
+
+#define CONSISTENTE '1'
+#define INCONSISTENTE '0'
 
 #define NULL_TERM '\0'
 
@@ -55,16 +58,16 @@ Registro* inicializarRegistro();
 Cabecalho* inicializarCabecalho();
 
 // Função para abrir um arquivo binário para leitura
-FILE *abrirArquivoLeitura(const char *nomeArquivo);
+FILE* abrirArquivoLeitura(const char *nomeArquivo);
 
 // Função para abrir um arquivo binário para escrita
-FILE *abrirArquivoEscrita(const char *nomeArquivo);
+FILE* abrirArquivoEscrita(const char *nomeArquivo);
 
 // Função para fechar um arquivo binário
 void fecharArquivo(FILE *arquivo);
 
 // Função para ler um registro do arquivo binário
-int lerRegistro(FILE *arquivo, Registro *registro);
+int lerRegistro(FILE* arquivo, Registro* registro); //TA ZUADA!
 
 // Função para escrever um registro no arquivo binário
 void escreverRegistro(FILE *arquivo, const Registro *registro);
@@ -82,6 +85,22 @@ int lerCabecalho(FILE* arquivo, Cabecalho* c);
 void atualizaCabecalho(Registro* registro, Cabecalho* cabecalho);
 
 // Função para imprimir o registro de dados
-void printRegister(Registro *registro);
+void printRegister(Registro* registro);
 
-#endif // REGISTEROPERATIONS_H_INCLUDED
+void removeLixo(char *str, int tamanho);
+
+//Funcao para leitura de um campo de um registro
+int lerCampo(FILE* arquivo, char** valorCampo, char* nomeCampo);
+
+void liberarRegistro(Registro* registro);
+
+/*====================================================================*/
+int ler_registro(FILE* arquivo, Registro* reg);
+
+int ler_campo(FILE* arquivo, char** valCampo, char* nomeCampo);
+int ler_header(FILE* arquivo, Cabecalho* cabecalho);
+// void imprime_registro(Registro reg);
+// void imprime_campo_texto(StringVariavel texto, char* fim);
+// void imprime_campo_numerico(int num, char* fim);
+
+#endif /* REGISTEROPERATIONS_H_INCLUDED */

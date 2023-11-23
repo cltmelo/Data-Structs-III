@@ -74,7 +74,7 @@ int tamanho_lista(Lista* li){
 
 void imprimeLista(Lista* li){
     if (li == NULL ){
-        return 0;
+        return;
     }
     Elem *no = *li;
     while(no != NULL){
@@ -90,7 +90,7 @@ void imprimeLista(Lista* li){
 
 
 int byte_offset(int RRN){
-    return (RRN * TAM_REGISTRO + TAM_CABECALHO);
+    return ((RRN * TAM_REGISTRO) + TAM_CABECALHO);
 }
 
 // Função para transformar linha do arquivo de dados para a variável do tipo registro
@@ -194,6 +194,15 @@ Registro* separaString(const char* Linha){
     registro->removido = '0';
     free(aux);
     return registro;
+}
+
+
+// Funcao para concatenar Strings Tec. Origem e Destino
+char* concat_string(Registro *reg){
+    char result[reg->tecnologiaOrigem.tamanho + reg->tecnologiaDestino.tamanho];
+    strcpy(result, reg->tecnologiaOrigem.string);
+    strcat(result, reg->tecnologiaDestino.string);
+    return result; // return dando erro na hora de retornar string
 }
 
 /*

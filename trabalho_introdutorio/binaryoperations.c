@@ -111,86 +111,112 @@ void LerBIN() {
 }
 
 // Funcionalidade 3
-void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por causa da alocação dinâmica.
-    char arq_bin[GLOBAL];
-    char nomeCampo[GLOBAL];
-    int quatidade_busca;
-    scanf("%s %d", arq_bin, &quatidade_busca);
-    FILE *bin = abrirArquivoLeitura(arq_bin);
+void selectWhere(){
+    char arq_bin[GLOBAL]; // Nome do arquivo binario
+    char nomeCampo[GLOBAL]; // nome do campo a ser buscado
+    int quantidade_busca; // Quantidade de busca;
 
+    // Recebe o nome do arquivo de entrada e a quantidade de valores para buscar
+    scanf("%s %d", arq_bin, &quantidade_busca);  
+
+    // // abre o arquivo de entrada
+    // FILE* bin = fopen(nome_bin, "rb");
+    // // checa erros na abertura do arquivo
+    // if(bin == NULL) {
+    //     printf("Falha no processamento do arquivo.\n");
+    //     return;
+    // }
+    FILE* bin = abrirArquivoLeitura(arq_bin);
+
+    // le registro de cabecalho e vai ao primeiro RRN, retorna quaisquer erros
     Cabecalho cabecalho;
-    int output = lerCabecalho(bin, &cabecalho);
-
-    if(output == 0){
+    int output = ler_header(bin, &cabecalho);
+    if(output == 1) { ///alterar os retornos tb
         printf("Falha no processamento do arquivo.\n");
+        // fclose(bin);
         fecharArquivo(bin);
         return;
     }
-
-    if(cabecalho.status == NAO_REMOVIDO){
-        printf("Falha no processamento do arquivo.\n");
-        fecharArquivo(bin);
-        return;
-    }
-
     
-    // char* tmp = malloc(GLOBAL *sizeof(char)); // auxilar temp do campo a ser buscado
-    char tmp[GLOBAL];
+    // retorna erro caso 'status' do arquivo lido seja '0' (inconsistente)
+    if(cabecalho.status == INCONSISTENTE) {
+        printf("Falha no processamento do arquivo.\n");
+        // fclose(bin);
+        fecharArquivo(bin);
+        return;
+    }
+
+    // declara variáveis a serem empregadas no loop de leitura
+    char* tmp = malloc(GLOBAL *sizeof(char)); // valor temporario do campo a ser buscado
+    char* valorBuscado; // ponteiro para armazenamento do campo buscado apos remocao de ""
 
     // repete o processo de busca para cada campo distinto a ser avaliado 
-    for(int i = 0; i < quatidade_busca; i++){
+    for(int i = 0; i < quantidade_busca; i++){
+        // Recebo o nome e valor do campo a serem buscados
         scanf("%s", nomeCampo);
         scanf("%s", tmp);
-        
-        scan_quote_string(tmp);
 
-         // ponteiro para armazenamento do campo buscado depois da remocao das aspas
+        valorBuscado = strtok(tmp, "\"");
 
-        
-        char* actual_field = malloc(GLOBAL*sizeof(char)); // valor do campo sendo lido no momento (me enrolei com a estática, vai com a dinâmica mesmo)
-        int contRRN = 0; // valor do RRN do registro a ser lido
+        // variaveis de apoio
+        Registro registro; // registro a ser devolvido
+        char* valorAtual = malloc(GLOBAL * sizeof(char)); // valor do campo sendo lido no momento
+        int RRN = 0; // valor do RRN do registro a ser lido
         int contBuscado = 0; // Quantidade de registros que satisfazem busca
-        int indexAux; // soh um auxilar p ver (contBuscado - [algo])
+        while(1){
+            // vai a posicao do RRN especificado
+            fseek(bin, byte_offset(RRN), SEEK_SET);
+            int output = ler_campo(bin, &valorAtual, nomeCampo);
+            if(output == 1) {
+                // break com fim do arquivo
+                break;
+            }
 
-        Registro *registro = inicializarRegistro(); // registro a ser devolvido
-        while(1){ //tu colocou while(0) e ai o loop não executava kkkkk
-            fseek(bin, byte_offset(contRRN), SEEK_SET);
-            //scan_quote_string(tmp);
+            // Erro encontrado durante a busca no arquivo
+            else if(output == (-1)) {
+                printf("Falha no processamento do arquivo.");
+                free(valorAtual); 
+                free(tmp);
+                // fclose(bin);
+                fecharArquivo(bin);
+                return;
+            }
             
             // verifica se o registro atual satisfaz a busca
-            if(strcmp(tmp, actual_field) == 0){
-                fseek(bin, byte_offset(contRRN), SEEK_SET);
-
+            if(strcmp(valorBuscado, valorAtual) == 0){
                 contBuscado++;
-
-                if(lerRegistro(bin, &registro)) { //leitura do registro atual
-                    break; //fim do arquivo
+                fseek(bin, byte_offset(RRN), SEEK_SET);
+                int aux = ler_registro(bin, &registro); // lê registro atual ///////////////////////////////////////////////ACHEI A FUNCAO CAGADA
+                if(aux) {
+                    // break com fim do arquivo
+                    break;
                 }
 
-                // imprime os dados contidos no registro lido
-                if(registro->removido != REMOVIDO)
+
+                // imprime os dados contidos no registro lido, caso nao removido
+                if(registro.removido != REMOVIDO)
                     printRegister(&registro);
 
                 // libera as strings alocadas
-                free(registro->tecnologiaDestino.string);
-                free(registro->tecnologiaOrigem.string);
+                free(registro.tecnologiaOrigem.string);
+                free(registro.tecnologiaDestino.string);
             }
-            contRRN++; //incremento do RRN para ir ao próximo registro
+            // Acresce para busca no proximo registro.
+            RRN++;
         }
-        free(actual_field);
-
         if(contBuscado == 0){
             printf("Registro inexistente.\n");
         }
-
-        indexAux = contBuscado - 1; //ata, era -1
-        if(i < indexAux){
+        free(valorAtual);
+        
+        int aux = quantidade_busca - 1;
+        if(i < aux)
             fseek(bin, TAM_CABECALHO, SEEK_SET);
-        }
     }
-    //free(tmp); //pra que isso pae? utilizamos estática (acho qeu vai ser mais eficiente em termos de memória)
-    fecharArquivo(bin); // Fechar arquivo
-}
+    free(tmp);
+    // fclose(bin); // Fechar arquivo
+    fecharArquivo(bin);
+}   
 
 
 //Funcionalidade 4
@@ -211,9 +237,8 @@ void buscarRRN(){
     lerCabecalho(arquivo, cabecalho);
     long pos = byte_offset(RRN);
     fseek(arquivo, pos, SEEK_SET);
-    if (RRN < cabecalho->nroParesTecnologias){
-        fread(&registro->removido, sizeof(char), 1, arquivo);
-        if (registro->removido == NAO_REMOVIDO){
+    if (fread(&(registro->removido), sizeof(char), 1, arquivo) != 0){
+            if (registro->removido == NAO_REMOVIDO){
             fread(&registro->grupo, sizeof(int), 1, arquivo);
             fread(&registro->popularidade, sizeof(int), 1, arquivo);
             fread(&registro->peso, sizeof(int), 1, arquivo);
@@ -232,7 +257,7 @@ void buscarRRN(){
             char resto[TAM_REGISTRO-tamRegistro];
             fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);  
 
-            printRegister(registro);      
+            printRegister(registro);
         } else {
             printf("Registro inexistente.\n");
         }
@@ -240,6 +265,22 @@ void buscarRRN(){
         printf("Registro inexistente.\n");
     }
     fecharArquivo(arquivo);
+}
+
+
+// Funcionalidade 5
+void btreeCreateTable(){
+    
+}
+
+// Funcionalidade 6 
+void btreeSelect(){
+
+}
+
+// Funcionalidade 7
+void InsertInto(){
+
 }
 
 /*

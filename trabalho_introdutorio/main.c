@@ -19,7 +19,6 @@
 int main(){
     int comando;
     scanf("%d", &comando);
-
     switch (comando)
     {
     case 1:
@@ -34,9 +33,12 @@ int main(){
     case 4:
         buscarRRN();
         break;
-    
+    case 5:
     default:
+        
         printf("Comando inexistente.\n");
     }
+
+
     return 0;
 }
