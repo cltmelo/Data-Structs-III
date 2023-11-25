@@ -1,29 +1,27 @@
 #include <stdio.h>
 #include "registeropertions.h"
 
-#define GLOBAL 256 //Só uma varável global aleatória para os arrays de nome de arquivo
-
-FILE* abrirArquivoLeitura(const char *nomeArquivo){
+FILE *abrirArquivoLeitura(const char *nomeArquivo){
     FILE* arquivo;
 
     arquivo = fopen(nomeArquivo, "rb");
 
     if(arquivo == NULL){
         printf("Falha no processamento do arquivo.\n");
-        return NULL;
+        return 0;
     }
     
     return arquivo; // Ponteiro no começo do arquivo
 }
 
-FILE* abrirArquivoEscrita(const char *nomeArquivo){
+FILE *abrirArquivoEscrita(const char *nomeArquivo){
     FILE* arquivo;
 
     arquivo = fopen(nomeArquivo, "wb+");
 
     if(arquivo == NULL){
         printf("Falha no processamento do arquivo.\n");
-        return NULL;
+        return 0;
     }
     
     return arquivo; // Ponteiro no começo do arquivo
@@ -38,7 +36,7 @@ void fecharArquivo(FILE *arquivo){
 
 
 Registro* inicializarRegistro(){
-    Registro* r; /* = (Registro*) malloc(sizeof(Registro)); */
+    Registro *r = (Registro*)malloc(sizeof(Registro));
     if (r == NULL) {
         perror("Erro ao alocar memória para o registro.\n");
         exit(EXIT_FAILURE);
@@ -70,7 +68,7 @@ void removeLixo(char *str, int tamanho) {
 
 Cabecalho* inicializarCabecalho(){
     Cabecalho* cabecalho = malloc(sizeof(Cabecalho));
-    cabecalho->status = NAO_REMOVIDO; 
+    cabecalho->status = '0'; 
     cabecalho->proxRRN = 0;   
     cabecalho->nroTecnologias = 0;  
     cabecalho->nroParesTecnologias = 0;
@@ -78,62 +76,36 @@ Cabecalho* inicializarCabecalho(){
     return cabecalho;
 }
 
-/**
- * @brief 
- * 
- * @param arquivo arquivo binário que será lido
- * @param registro
- * @return 1 quando encontra o fim do arquivo, ou 0 ao ter sucesso na leitura
- * 
- * @attention A ordem dos fread() para a leitura dos dados do registro IMPORTA, mas não sei o porquê.
- */
-int lerRegistro(FILE* arquivo, Registro* registro){
+int lerRegistro(FILE *arquivo, Registro *registro){
 
-    //Registro logicamente removido?
-    if( fread(&(registro->removido), sizeof(char), 1, arquivo) == 0 ){
-        return 1;
-    }
+    //leitura do registro
+    if((&(registro->removido), sizeof(char), 1, arquivo) == NAO_REMOVIDO)
+        return 0; //ok na leitura deste campo
 
-    // Leitura dos dados do registro
-
-    // fread(&(registro->grupo), sizeof(char), 1, arquivo);         /*POR QUE A ORDEM DESTES FREAD() FAZEM DIFERENÇA?????*/
-    // fread(&(registro->peso), sizeof(char), 1, arquivo);
-    // fread(&(registro->popularidade), sizeof(char), 1, arquivo);
-
-    fread(&(registro->grupo), sizeof(int), 1, arquivo);
-    fread(&(registro->popularidade), sizeof(int), 1, arquivo);
-    fread(&(registro->peso), sizeof(int), 1, arquivo);
+    fread(&(registro->grupo), sizeof(char), 1, arquivo);
+    fread(&(registro->peso), sizeof(char), 1, arquivo);
+    fread(&(registro->popularidade), sizeof(char), 1, arquivo);
 
 
-    // Leitura dos registros e alocação da string + leitura string e terminador nulo
-    fread( &(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, arquivo );
-    registro->tecnologiaOrigem.string = malloc( (registro->tecnologiaOrigem.tamanho + 1) * sizeof(char));
+    fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, arquivo);
+    registro->tecnologiaDestino.string = malloc((registro->tecnologiaDestino.tamanho + 1)*sizeof(char)); //alocação para o nome, pela leitura do tamanho do registro
 
-    fread( registro->tecnologiaOrigem.string, sizeof(char), registro->tecnologiaOrigem.tamanho, arquivo );
-    registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+    fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, arquivo);
+    registro->tecnologiaOrigem.string = malloc((registro->tecnologiaOrigem.tamanho + 1)*sizeof(char)); 
 
 
-    fread( &(registro->tecnologiaDestino.tamanho), sizeof(int), 1, arquivo );
-    registro->tecnologiaDestino.string = malloc( (registro->tecnologiaDestino.tamanho + 1) * sizeof(char));
-
+    //leitura do nome e preenchimento com '\0' no final
     fread(registro->tecnologiaDestino.string, sizeof(char), registro->tecnologiaDestino.tamanho, arquivo);
+    fread(registro->tecnologiaOrigem.string, sizeof(char), registro->tecnologiaOrigem.tamanho, arquivo);
     registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+    registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
     
-    // fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, arquivo);
-    // registro->tecnologiaDestino.string = malloc((registro->tecnologiaDestino.tamanho + 1)*sizeof(char)); //alocação para o nome, pela leitura do tamanho do registro
 
-    // //leitura do nome e preenchimento com '\0' no final AQUI TA ERRADO
-    // fread(registro->tecnologiaDestino.string, sizeof(char), registro->tecnologiaDestino.tamanho, arquivo);
-    // fread(registro->tecnologiaOrigem.string, sizeof(char), registro->tecnologiaOrigem.tamanho, arquivo);
-    // registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
-    // registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
-    
-    
     //Ignorando a leitura de lixo
     int aux = TAM_REGISTRO - (TAM_REGISTRO_FIXO + registro->tecnologiaOrigem.tamanho + registro->tecnologiaDestino.tamanho);
     fseek(arquivo, aux, SEEK_CUR);
 
-    return 0;
+    return 1; //leitura bem sucedida
 }
 
 
@@ -240,67 +212,6 @@ void printRegister(Registro *registro){
     printf("%s", skip_line);
 }
 
-
-/**
- * @brief le um campo do registro atual, a partir da posição corrente e armazena seu valor
- * 
- * @param arquivo binario que vai ser lido
- * @param valorCampo char* (string) para armazenar o valor do campo lido
- * @param nomeCampo nome do campo lido
- * @return 1 para o fim do arquivo, 0 é sucesso, -1 caso nome do campo seja inválido
- * 
- * @attention Teria que fazer uma verificação mais detalhada, pois a saída do programa parece estar correta, mas 
- * não vi a necessidade de tantos fseek(). Logo, deixei-os como comentários
- */
-int lerCampo(FILE* arquivo, char** valorCampo, char* nomeCampo){
-    char removido = REMOVIDO;
-    int tmp;
-    int tam;
-
-    if ( fread(&(removido), sizeof(char), 1, arquivo) == 0) {
-        return 1;
-    }
-    char end = (*valorCampo)[tam];
-    if (strcmp(nomeCampo, "grupo") == 0) {
-        fread(&tmp, sizeof(int), 1, arquivo);
-        snprintf(*valorCampo, sizeof(char) * GLOBAL, "%d", tmp);
-    } else if (strcmp(nomeCampo, "popularidade") == 0) {
-        // fseek(arquivo, 4, SEEK_CUR);
-        fread(&tmp, sizeof(int), 1, arquivo);
-        snprintf(*valorCampo, sizeof(char) * GLOBAL, "%d", tmp);
-    } else if (strcmp(nomeCampo, "peso") == 0) {
-        // fseek(arquivo, 8, SEEK_CUR);
-        fread(&tmp, sizeof(int), 1, arquivo);
-        snprintf(*valorCampo, sizeof(char) * GLOBAL, "%d", tmp);
-    } else if (strcmp(nomeCampo, "nomeTecnologiaOrigem") == 0) {
-        // fseek(arquivo, 12, SEEK_CUR);
-        fread(&tam, sizeof(int), 1, arquivo);
-        fread(*valorCampo, sizeof(char), tam, arquivo);
-        // snprintf(*valorCampo, sizeof(char) * GLOBAL, "%d", tmp);
-        end = NULL_TERM;
-    } else if (strcmp(nomeCampo, "nomeTecnologiaDestino") == 0) {
-        // fseek(arquivo, 12, SEEK_CUR);
-        // fread(&tam, sizeof(int), 1, arquivo);
-        // fseek(arquivo, tam, SEEK_CUR);
-        fread(&tam, sizeof(int), 1, arquivo);
-        fread(*valorCampo, sizeof(char), tam, arquivo);
-        // snprintf(*valorCampo, sizeof(char) * GLOBAL, "%d", tmp);
-        end = NULL_TERM;
-    } else { 
-        return (-1);
-    }
-    return 0;
-}
-
-void liberarRegistro(Registro* registro) {
-    // Libere a memória para as strings dentro da estrutura
-    free(registro->tecnologiaOrigem.string);
-    free(registro->tecnologiaDestino.string);
-
-    // Libere a memória da própria estrutura Registro
-    free(registro);
-}
-
 /*=============================================================================================================================*/
 
 int ler_registro(FILE* arquivo, Registro* reg){
@@ -350,9 +261,6 @@ int ler_header(FILE* arquivo, Cabecalho* cabecalho){
 
     return 0;
 }
-// void imprime_registro(Registro reg);
-// void imprime_campo_texto(StringVariavel texto, char* fim);
-// void imprime_campo_numerico(int num, char* fim){}
 
 int ler_campo(FILE* arquivo, char** valCampo, char* nomeCampo) {
     char removido = '1'; // variavel para armazenar status de remoção do registro, com o intuito de identificar fim do arquivo.

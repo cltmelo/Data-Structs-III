@@ -74,7 +74,7 @@ int tamanho_lista(Lista* li){
 
 void imprimeLista(Lista* li){
     if (li == NULL ){
-        return;
+        return 0;
     }
     Elem *no = *li;
     while(no != NULL){
@@ -90,7 +90,7 @@ void imprimeLista(Lista* li){
 
 
 int byte_offset(int RRN){
-    return ((RRN * TAM_REGISTRO) + TAM_CABECALHO);
+    return (RRN * TAM_REGISTRO + TAM_CABECALHO);
 }
 
 // Função para transformar linha do arquivo de dados para a variável do tipo registro

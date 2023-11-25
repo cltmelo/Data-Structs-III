@@ -22,7 +22,16 @@ void criaTable(){
     scanf("%s", arq_bin);
 
     FILE *csv = fopen(arq_csv, "r");
-    FILE *bin = abrirArquivoEscrita(arq_bin);
+    if (csv == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+    // FILE *bin = abrirArquivoEscrita(arq_bin);
+    FILE *bin = fopen(arq_bin, "wb");
+    if(bin == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
 
     
     
@@ -74,84 +83,171 @@ void LerBIN() {
     char arq_bin[GLOBAL];
     scanf("%s", arq_bin);
 
-    FILE *arquivo = abrirArquivoLeitura(arq_bin);   
+    // FILE *arquivo = abrirArquivoLeitura(arq_bin);
+    FILE* bin = fopen(arq_bin, "rb");
+    if (bin == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }   
 
     Registro* registro = inicializarRegistro();
     Cabecalho* cabecalho = inicializarCabecalho();
-    if(!lerCabecalho(arquivo, cabecalho)){
+    if(!lerCabecalho(bin, cabecalho)){
         printf("Registro Inexistente.\n");
         return;
     }
     
-    while (fread(&(registro->removido), sizeof(char), 1, arquivo) == 1) {
-        fread(&(registro->grupo), sizeof(int), 1, arquivo);
-        fread(&(registro->popularidade), sizeof(int), 1, arquivo);
-        fread(&(registro->peso), sizeof(int), 1, arquivo);
+    while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+        fread(&(registro->grupo), sizeof(int), 1, bin);
+        fread(&(registro->popularidade), sizeof(int), 1, bin);
+        fread(&(registro->peso), sizeof(int), 1, bin);
         
-        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, arquivo);
+        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
         registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
-        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, arquivo);
+        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
         registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
 
 
-        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, arquivo);
+        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
         registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
-        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, arquivo);
+        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
         registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
 
         int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
         char resto[TAM_REGISTRO-tamRegistro];
-        fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);
+        fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
         if (registro->removido == '0'){
             printRegister(registro);
         }       
         
     }
-    fecharArquivo(arquivo);
+    fecharArquivo(bin);
 }
 
-// Funcionalidade 3
-void selectWhere(){
-    char arq_bin[GLOBAL]; // Nome do arquivo binario
-    char nomeCampo[GLOBAL]; // nome do campo a ser buscado
-    int quantidade_busca; // Quantidade de busca;
+// // Funcionalidade 3
+// void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por causa da alocação dinâmica.
+//     char arq_bin[GLOBAL];
+//     char nomeCampo[GLOBAL];
+//     int quatidade_busca;
+//     scanf("%s %d", arq_bin, &quatidade_busca);
+//     FILE *bin = abrirArquivoLeitura(arq_bin);
 
-    // Recebe o nome do arquivo de entrada e a quantidade de valores para buscar
-    scanf("%s %d", arq_bin, &quantidade_busca);  
+//     Cabecalho cabecalho;
+//     int output = lerCabecalho(bin, &cabecalho);
 
-    // // abre o arquivo de entrada
-    // FILE* bin = fopen(nome_bin, "rb");
-    // // checa erros na abertura do arquivo
-    // if(bin == NULL) {
-    //     printf("Falha no processamento do arquivo.\n");
-    //     return;
-    // }
-    FILE* bin = abrirArquivoLeitura(arq_bin);
+//     if(output == 0){
+//         printf("Falha no processamento do arquivo.\n");
+//         fecharArquivo(bin);
+//         return;
+//     }
 
-    // le registro de cabecalho e vai ao primeiro RRN, retorna quaisquer erros
-    Cabecalho cabecalho;
-    int output = ler_header(bin, &cabecalho);
-    if(output == 1) { ///alterar os retornos tb
-        printf("Falha no processamento do arquivo.\n");
-        // fclose(bin);
-        fecharArquivo(bin);
-        return;
-    }
+//     if(cabecalho.status == NAO_REMOVIDO){
+//         printf("Falha no processamento do arquivo.\n");
+//         fecharArquivo(bin);
+//         return;
+//     }
+
     
-    // retorna erro caso 'status' do arquivo lido seja '0' (inconsistente)
-    if(cabecalho.status == INCONSISTENTE) {
+//     // char* tmp = malloc(GLOBAL *sizeof(char)); // auxilar temp do campo a ser buscado
+//     char tmp[GLOBAL];
+
+//     // repete o processo de busca para cada campo distinto a ser avaliado 
+//     for(int i = 0; i < quatidade_busca; i++){
+//         scanf("%s", nomeCampo);
+//         scanf("%s", tmp);
+        
+//         scan_quote_string(tmp);
+
+//          // ponteiro para armazenamento do campo buscado depois da remocao das aspas
+
+        
+//         char* actual_field = malloc(GLOBAL*sizeof(char)); // valor do campo sendo lido no momento (me enrolei com a estática, vai com a dinâmica mesmo)
+//         int contRRN = 0; // valor do RRN do registro a ser lido
+//         int contBuscado = 0; // Quantidade de registros que satisfazem busca
+//         int indexAux; // soh um auxilar p ver (contBuscado - [algo])
+
+//         Registro *registro = inicializarRegistro(); // registro a ser devolvido
+//         while(1){ //tu colocou while(0) e ai o loop não executava kkkkk
+//             fseek(bin, byte_offset(contRRN), SEEK_SET);
+//             //scan_quote_string(tmp);
+            
+//             // verifica se o registro atual satisfaz a busca
+//             if(strcmp(tmp, actual_field) == 0){
+//                 fseek(bin, byte_offset(contRRN), SEEK_SET);
+
+//                 contBuscado++;
+
+//                 if(lerRegistro(bin, &registro)) { //leitura do registro atual
+//                     break; //fim do arquivo
+//                 }
+
+//                 // imprime os dados contidos no registro lido
+//                 if(registro->removido != REMOVIDO)
+//                     printRegister(&registro);
+
+//                 // libera as strings alocadas
+//                 free(registro->tecnologiaDestino.string);
+//                 free(registro->tecnologiaOrigem.string);
+//             }
+//             contRRN++; //incremento do RRN para ir ao próximo registro
+//         }
+//         free(actual_field);
+
+//         if(contBuscado == 0){
+//             printf("Registro inexistente.\n");
+//         }
+
+//         indexAux = contBuscado - 1; //ata, era -1
+//         if(i < indexAux){
+//             fseek(bin, TAM_CABECALHO, SEEK_SET);
+//         }
+//     }
+//     //free(tmp); //pra que isso pae? utilizamos estática (acho qeu vai ser mais eficiente em termos de memória)
+//     fecharArquivo(bin); // Fechar arquivo
+// }
+
+/*======================================================================================================================*/
+
+// Funcionalidade 3
+void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por causa da alocação dinâmica.
+    char arq_bin[GLOBAL];
+    char nomeCampo[GLOBAL];
+    int quatidade_busca;
+    scanf("%s %d", arq_bin, &quatidade_busca);
+    // FILE *bin = abrirArquivoLeitura(arq_bin);
+    FILE *bin;
+
+    bin = fopen(arq_bin, "rb");
+
+    if(bin == NULL){
         printf("Falha no processamento do arquivo.\n");
-        // fclose(bin);
-        fecharArquivo(bin);
+        return NULL;
+    }
+
+    Cabecalho cabecalho;
+    // int output = lerCabecalho(bin, &cabecalho);
+    int output = ler_header(bin, &cabecalho);
+
+    if(output == 1){
+        printf("Falha no processamento do arquivo.\n");
+        fecharArquivo(bin);//
         return;
     }
 
+    // retorna erro caso 'status' do arquivo lido seja '0' (inconsistente)
+    if(cabecalho.status == INCONSISTENTE){
+        printf("Falha no processamento do arquivo.\n");
+        fecharArquivo(bin);//
+        return;
+    }
+
+    
     // declara variáveis a serem empregadas no loop de leitura
     char* tmp = malloc(GLOBAL *sizeof(char)); // valor temporario do campo a ser buscado
     char* valorBuscado; // ponteiro para armazenamento do campo buscado apos remocao de ""
 
     // repete o processo de busca para cada campo distinto a ser avaliado 
-    for(int i = 0; i < quantidade_busca; i++){
+    for(int i = 0; i < quatidade_busca; i++){
         // Recebo o nome e valor do campo a serem buscados
         scanf("%s", nomeCampo);
         scanf("%s", tmp);
@@ -209,7 +305,7 @@ void selectWhere(){
         }
         free(valorAtual);
         
-        int aux = quantidade_busca - 1;
+        int aux = quatidade_busca - 1;
         if(i < aux)
             fseek(bin, TAM_CABECALHO, SEEK_SET);
     }
@@ -218,6 +314,8 @@ void selectWhere(){
     fecharArquivo(bin);
 }   
 
+/*======================================================================================================================*/
+
 
 //Funcionalidade 4
 void buscarRRN(){
@@ -225,37 +323,48 @@ void buscarRRN(){
     char arq_bin[GLOBAL]; // Nome do arquivo binario
 
     // Recebe o nome do arquivo de entrada e a quantidade de valores para buscar
-    scanf("%s %d", arq_bin, &RRN);
+    // scanf("%s %d", arq_bin, &RRN);
+    scanf("%s ", arq_bin);
 
-    FILE *arquivo = abrirArquivoLeitura(arq_bin);
+    // FILE *arquivo = abrirArquivoLeitura(arq_bin);
+    FILE* bin = fopen(arq_bin, "rb");
+    if (bin == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
 
     Cabecalho *cabecalho = inicializarCabecalho();
     Registro* registro = inicializarRegistro();   
 
     
 
-    lerCabecalho(arquivo, cabecalho);
+    lerCabecalho(bin, cabecalho);
+    if (cabecalho->status == INCONSISTENTE) {
+        printf("Registro inexistente.\n");
+        return;
+    }
+    scanf("%d", &RRN);
     long pos = byte_offset(RRN);
-    fseek(arquivo, pos, SEEK_SET);
-    if (fread(&(registro->removido), sizeof(char), 1, arquivo) != 0){
+    fseek(bin, pos, SEEK_SET);
+    if (fread(&(registro->removido), sizeof(char), 1, bin) != 0){
             if (registro->removido == NAO_REMOVIDO){
-            fread(&registro->grupo, sizeof(int), 1, arquivo);
-            fread(&registro->popularidade, sizeof(int), 1, arquivo);
-            fread(&registro->peso, sizeof(int), 1, arquivo);
+            fread(&registro->grupo, sizeof(int), 1, bin);
+            fread(&registro->popularidade, sizeof(int), 1, bin);
+            fread(&registro->peso, sizeof(int), 1, bin);
 
-            fread(&registro->tecnologiaOrigem.tamanho, sizeof(int), 1, arquivo);
+            fread(&registro->tecnologiaOrigem.tamanho, sizeof(int), 1, bin);
             registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
-            fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, arquivo);
+            fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
             registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = '\0';
 
-            fread(&registro->tecnologiaDestino.tamanho, sizeof(int), 1, arquivo);
+            fread(&registro->tecnologiaDestino.tamanho, sizeof(int), 1, bin);
             registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
-            fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, arquivo);
+            fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
             registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = '\0';
 
             int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
             char resto[TAM_REGISTRO-tamRegistro];
-            fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);  
+            fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);  
 
             printRegister(registro);
         } else {
@@ -264,7 +373,7 @@ void buscarRRN(){
     } else {
         printf("Registro inexistente.\n");
     }
-    fecharArquivo(arquivo);
+    fecharArquivo(bin);
 }
 
 
