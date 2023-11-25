@@ -18,7 +18,7 @@
 
 
 int main(){
-    /*int comando;
+    int comando;
     scanf("%d", &comando);
 
     switch (comando)
@@ -35,10 +35,9 @@ int main(){
     case 4:
         buscarRRN();
         break;
-    
     default:
         printf("Comando inexistente.\n");
-    }*/
+    }
 
     btree_header bHeader;
     FILE* indice = abrirArquivoLeitura("indice1.bin");

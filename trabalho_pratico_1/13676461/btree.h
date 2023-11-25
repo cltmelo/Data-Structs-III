@@ -32,6 +32,6 @@ void removerChave(int chave);
 void read_node(FILE* indice, Node *no, int RRN);
 void printNode(Node no);
 btree_header LerHeader(FILE* indice);
-
+int InserirNo(FILE *indice, char* newKey, int RRN, int RRN_pai);
 
 #endif

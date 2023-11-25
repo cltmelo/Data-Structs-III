@@ -116,3 +116,17 @@ int Busca(FILE* indice, char *chave, int RRN) {
         return 0;
     }
 }
+
+
+
+
+int InserirNo(FILE *indice, char* newKey, int RRN, int RRN_pai){
+    // 1. Procurar a folha onde a chave deve ser inserida
+
+    // 2. Inserir a chave na folha
+
+    // 3. Atualizar a árvore subindo até a raiz, se necessário
+
+    // 4. Se a raiz foi dividida, criar uma nova raiz
+
+}
