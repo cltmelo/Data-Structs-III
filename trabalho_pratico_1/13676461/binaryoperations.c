@@ -213,25 +213,25 @@ void buscarRRN(){
     fseek(arquivo, pos, SEEK_SET);
     if (fread(&(registro->removido), sizeof(char), 1, arquivo) != 0){
             if (registro->removido == NAO_REMOVIDO){
-            fread(&registro->grupo, sizeof(int), 1, arquivo);
-            fread(&registro->popularidade, sizeof(int), 1, arquivo);
-            fread(&registro->peso, sizeof(int), 1, arquivo);
+                fread(&registro->grupo, sizeof(int), 1, arquivo);
+                fread(&registro->popularidade, sizeof(int), 1, arquivo);
+                fread(&registro->peso, sizeof(int), 1, arquivo);
 
-            fread(&registro->tecnologiaOrigem.tamanho, sizeof(int), 1, arquivo);
-            registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
-            fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, arquivo);
-            registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = '\0';
+                fread(&registro->tecnologiaOrigem.tamanho, sizeof(int), 1, arquivo);
+                registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+                fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, arquivo);
+                registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = '\0';
 
-            fread(&registro->tecnologiaDestino.tamanho, sizeof(int), 1, arquivo);
-            registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
-            fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, arquivo);
-            registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = '\0';
+                fread(&registro->tecnologiaDestino.tamanho, sizeof(int), 1, arquivo);
+                registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+                fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, arquivo);
+                registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = '\0';
 
-            int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
-            char resto[TAM_REGISTRO-tamRegistro];
-            fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);  
+                int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+                char resto[TAM_REGISTRO-tamRegistro];
+                fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);  
 
-            printRegister(registro);
+                printRegister(registro);
         } else {
             printf("Registro inexistente.\n");
         }
@@ -260,6 +260,7 @@ void btreeCreateTable(){
         return;
     }
     int RRN = 0;
+    int chaves = 0;
     while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
         fread(&(registro->grupo), sizeof(int), 1, bin);
         fread(&(registro->popularidade), sizeof(int), 1, bin);
@@ -279,16 +280,17 @@ void btreeCreateTable(){
         int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
         char resto[TAM_REGISTRO-tamRegistro];
         fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
-        if (registro->removido == NAO_REMOVIDO){
+        if (registro->removido == NAO_REMOVIDO && registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0){
             char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
-            strcpy(concat, registro->tecnologiaDestino.string);
-            strcat(concat, registro->tecnologiaOrigem.string);
+            strcpy(concat, registro->tecnologiaOrigem.string);
+            strcat(concat, registro->tecnologiaDestino.string);
             bHeader = InserirNo(indice, concat, RRN);
-            RRN++;
-        }       
-        
+        }
+        free(registro->tecnologiaOrigem.string);
+        free(registro->tecnologiaDestino.string);
+        RRN++;
     }
-    
+
     bHeader.status = '1';
     escreve_btree_header(indice, &bHeader);
     fecharArquivo(bin);
@@ -303,9 +305,17 @@ void btreeSelect(){
 
 // Funcionalidade 7
 void InsertInto(){
-
+    /*int quantidade;
+    char arq_bin[GLOBAL];
+    char arq_indice[GLOBAL];
+    scanf("%s", arq_bin);
+    scanf("%s", arq_indice);
+    scanf("%d", &quantidade);
+    FILE *indice = abrirArquivoEscrita(arq_indice);
+    FILE *bin = abrirArquivoLeitura(arq_bin);
+    Registro *Registro = inicializarRegistro();
+    scanf("%s, %s, %s, %s ")
+    for (int i = 0; i < quantidade; i++){
+        scanf("%s")
+    }*/
 }
-
-/*
-----------------------------------------------------------------------------------------------------------------------------------
-*/

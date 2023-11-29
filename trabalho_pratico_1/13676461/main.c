@@ -18,7 +18,7 @@
 
 
 int main(){
-    /*int comando;
+    int comando;
     scanf("%d", &comando);
 
     switch (comando)
@@ -40,10 +40,10 @@ int main(){
         break;
     default:
         printf("Comando inexistente.\n");
-    }*/
+    }
 
 
-    btree_header bHeader = criarArvoreB();
+    /*btree_header bHeader = criarArvoreB();
     FILE* indice = abrirArquivoEscrita("teste.bin");
     escreve_btree_header(indice, &bHeader);
     int i = 0;
@@ -56,7 +56,7 @@ int main(){
         scanf("%s", &temp);
         InserirNo(indice, &temp, i);
     }
-    fclose(indice);
+    fclose(indice);*/
     
     return 0;
 }
