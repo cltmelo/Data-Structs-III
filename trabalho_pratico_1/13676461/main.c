@@ -18,7 +18,7 @@
 
 
 int main(){
-    int comando;
+    /*int comando;
     scanf("%d", &comando);
 
     switch (comando)
@@ -35,13 +35,28 @@ int main(){
     case 4:
         buscarRRN();
         break;
+    case 5:
+        btreeCreateTable();
+        break;
     default:
         printf("Comando inexistente.\n");
-    }
+    }*/
 
-    btree_header bHeader;
-    FILE* indice = abrirArquivoLeitura("indice1.bin");
-    bHeader = LerHeader(indice);
-    Busca(indice, "C#XAMARIN", bHeader.noRaiz);
+
+    btree_header bHeader = criarArvoreB();
+    FILE* indice = abrirArquivoEscrita("teste.bin");
+    escreve_btree_header(indice, &bHeader);
+    int i = 0;
+    char temp[51];
+    while (i != -1){
+        scanf("%d", &i);
+        if (i == -1){
+            break;
+        }
+        scanf("%s", &temp);
+        InserirNo(indice, &temp, i);
+    }
+    fclose(indice);
+    
     return 0;
 }

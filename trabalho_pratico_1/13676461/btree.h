@@ -22,16 +22,15 @@ typedef struct {
 
 /* Funcões da Árvore B */
 btree_header criarArvoreB();
-void escreve_btree_header(FILE *indice, btree_header bHeader);
+void escreve_btree_header(FILE *indice, btree_header *bHeader);
 int byteoffset_bHeader(int rrn);
-void escreve_node(FILE *indice, Node no, btree_header bHeader);
+void escreve_node(FILE *indice, Node *no);
 int Busca(FILE* indice, char *chave, int RRN);
 void inserirChave(int chave);
-void split(int chave);
 void removerChave(int chave);
 void read_node(FILE* indice, Node *no, int RRN);
 void printNode(Node no);
 btree_header LerHeader(FILE* indice);
-int InserirNo(FILE *indice, char* newKey, int RRN, int RRN_pai);
+btree_header InserirNo(FILE *indice, char* newKey, int PR);
 
 #endif

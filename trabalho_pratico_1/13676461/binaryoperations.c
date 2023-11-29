@@ -1,6 +1,6 @@
 #include "binaryoperations.h"
 #include "funcoesAuxiliares.h"
-
+#include "btree.h"
 /*
 ----------------------------------------------------------------------------------------------------------------------------------
 Funcionalidades do algoritmo: 
@@ -244,7 +244,56 @@ void buscarRRN(){
 
 // Funcionalidade 5
 void btreeCreateTable(){
+    char arq_bin[GLOBAL];
+    char arq_indice[GLOBAL];
+    scanf("%s", arq_bin);
+    scanf("%s", arq_indice);
+
+    FILE *indice = abrirArquivoEscrita(arq_indice);
+    FILE *bin = abrirArquivoLeitura(arq_bin);
+    btree_header bHeader = criarArvoreB();
+    escreve_btree_header(indice, &bHeader);
+    Registro* registro = inicializarRegistro();
+    Cabecalho* cabecalho = inicializarCabecalho();
+    if(!lerCabecalho(bin, cabecalho)){
+        printf("Registro Inexistente.\n");
+        return;
+    }
+    int RRN = 0;
+    while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+        fread(&(registro->grupo), sizeof(int), 1, bin);
+        fread(&(registro->popularidade), sizeof(int), 1, bin);
+        fread(&(registro->peso), sizeof(int), 1, bin);
+        
+        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+        registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+        registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+
+
+        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+        registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+        registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+
+        int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+        char resto[TAM_REGISTRO-tamRegistro];
+        fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
+        if (registro->removido == NAO_REMOVIDO){
+            char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
+            strcpy(concat, registro->tecnologiaDestino.string);
+            strcat(concat, registro->tecnologiaOrigem.string);
+            bHeader = InserirNo(indice, concat, RRN);
+            RRN++;
+        }       
+        
+    }
     
+    bHeader.status = '1';
+    escreve_btree_header(indice, &bHeader);
+    fecharArquivo(bin);
+    fecharArquivo(indice);
+    binarioNaTela(arq_indice);
 }
 
 // Funcionalidade 6 

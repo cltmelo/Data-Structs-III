@@ -17,29 +17,60 @@ btree_header criarArvoreB(){
     return bHeader;
 }
 
+Node criaNode(){
+    Node no;
+    no.nroChavesNo = 0;
+    no.alturaNo = 1;
+    no.RRNdoNO = 0;
+    for (int i = 0; i < 3; i++) {
+        no.P[i] = -1;
+        no.C[i][0] = '\0';
+        no.PR[i] = -1;
+    }
+    no.P[3] = -1;
+    return no;
+}
 // Funcao para escrever cabecalho no arquivo de indices
-void escreve_btree_header(FILE *indice, btree_header bHeader){
+void escreve_btree_header(FILE *indice, btree_header *bHeader){
     fseek(indice, 0, SEEK_SET);
-    fwrite(&(bHeader.status), sizeof(char), 1, indice);
-    fwrite(&(bHeader.noRaiz), sizeof(int), 1, indice);
-    fwrite(&(bHeader.RRNproxNo), sizeof(int), 1, indice);
-    fwrite(LIXO, sizeof(char), 196, indice);
+    fwrite(&(bHeader->status), sizeof(char), 1, indice);
+    fwrite(&(bHeader->noRaiz), sizeof(int), 1, indice);
+    fwrite(&(bHeader->RRNproxNo), sizeof(int), 1, indice);
+
+    int aux = 196;
+    
+    char trash[aux];
+
+    for(int i=0; i<aux; i++){
+        trash[i] = LIXO;
+    }
+
+    fwrite(trash, sizeof(char), aux, indice);
 }
 
 
 // Funcao para escrever nó no arquivo de indices
-void escreve_node(FILE *indice, Node no, btree_header bHeader){
-    fseek(indice, byteoffset_bHeader(bHeader.RRNproxNo), SEEK_SET);
-    fwrite(&(no.nroChavesNo), sizeof(int), 1, indice);
-    fwrite(&(no.alturaNo), sizeof(int), 1, indice);
-    fwrite(&(no.RRNdoNO), sizeof(int), 1, indice);
+void escreve_node(FILE *indice, Node *no){
+    fseek(indice, byteoffset_bHeader(no->RRNdoNO), SEEK_SET);
+    fwrite(&(no->nroChavesNo), sizeof(int), 1, indice);
+    fwrite(&(no->alturaNo), sizeof(int), 1, indice);
+    fwrite(&(no->RRNdoNO), sizeof(int), 1, indice);
     
     for (int i = 0; i < 3; i++) {
-        fwrite(&(no.P[i]), sizeof(int), 1, indice);
-        fwrite(no.C[i], strlen(no.C[i]) + 1, 1, indice); 
-        fwrite(&(no.PR[i]), sizeof(int), 1, indice);
-    }
-    fwrite(&(no.P[3]), sizeof(int), 1, indice); 
+        fwrite(&(no->P[i]), sizeof(int), 1, indice);
+        fwrite(no->C[i], strlen(no->C[i]), 1, indice); 
+        int aux = 55-strlen(no->C[i]);
+    
+        char trash[aux];
+
+        for(int i=0; i<aux; i++){
+            trash[i] = LIXO;
+        }
+
+        fwrite(trash, sizeof(char), aux, indice);
+            fwrite(&(no->PR[i]), sizeof(int), 1, indice);
+        }
+    fwrite(&(no->P[3]), sizeof(int), 1, indice); 
 }
 
 
@@ -101,32 +132,235 @@ int Busca(FILE* indice, char *chave, int RRN) {
     }
     if (i < no.nroChavesNo && strcmp(chave, no.C[i]) == 0) {
         // A chave está presente na árvore
-        return 1;
+        return no.RRNdoNO;
     }
     int cmp = strcmp(chave, no.C[i]);
     if (strlen(no.C[i]) == 0){
         cmp = -1;
     }
     if (no.P[i] != -1 && cmp < 0) {
-        Busca(indice, chave, no.P[i]);
+        return Busca(indice, chave, no.P[i]);
     } else if (no.P[i + 1] != -1) {
-        Busca(indice, chave, no.P[i+1]);
+        return Busca(indice, chave, no.P[i+1]);
     } else {
         // A chave não está presente na árvore
-        return 0;
+        return -1;
     }
 }
 
 
+Node BuscaNoFolha(FILE* indice, int RRN, char* chave){
+    Node no;
+    read_node(indice, &no, RRN); // Implemente a função de leitura do nó do disco
+    int i = 0;
+    while (i < no.nroChavesNo && strcmp(chave, no.C[i]) > 0) {
+        i++;
+    }
+
+    if (no.alturaNo == 1){
+        return no;
+    }
+    int cmp = strcmp(chave, no.C[i]);
+    if (strlen(no.C[i]) == 0){
+        cmp = -1;
+    }
+    if (no.P[i] != -1 && cmp < 0) {
+        return BuscaNoFolha(indice, no.P[i], chave);
+    } else if (no.P[i + 1] != -1) {
+        return BuscaNoFolha(indice, no.P[i+1], chave);
+    }
+}
 
 
-int InserirNo(FILE *indice, char* newKey, int RRN, int RRN_pai){
+int insereNoIndice(Node *no, char* newKey, int PR, int P){
+    int pos = 0;
+
+    while (pos < 3) { 
+        if (strlen(no->C[pos]) == 0){ // Se a posição nao tiver nada, insere a chave
+            strcpy(no->C[pos], newKey);
+            no->PR[pos] = PR;
+            no->P[pos + 1] = P;
+            break;
+        } else if (strcmp(newKey, no->C[pos]) < 0){ // Caso contrario, ve se a chave deveria estar na posicao da chave ja inserida
+            no->P[3] = no->P[2]; // Se sim, desloca as demais chaves para frente
+            strcpy(no->C[2], no->C[1]);
+            no->PR[2] = no->PR[1];
+            if (pos == 0){
+                no->P[2] = no->P[1];
+                no->P[1] = no->P[0];
+                strcpy(no->C[1], no->C[0]);
+                no->PR[1] = no->PR[0];
+                strcpy(no->C[0], newKey);
+                no->PR[0] = PR;
+                no->P[pos + 1] = P;
+            } else {
+                strcpy(no->C[1], newKey);
+                no->PR[1] = PR;
+                no->P[pos + 1] = P;   
+            }   
+            break;      
+        }
+        pos++;
+    }
+    no->nroChavesNo++;
+    return pos;
+
+}
+
+int BuscaPai(FILE* indice, int RRN, char* chave, int aux){
+    Node no;
+    read_node(indice, &no, RRN); // Implemente a função de leitura do nó do disco
+    int i = 0;
+    while (i < no.nroChavesNo && strcmp(chave, no.C[i]) > 0) {
+        i++;
+    }
+
+    if (i < no.nroChavesNo && strcmp(chave, no.C[i]) == 0) {
+        return aux;
+    }
+    int cmp = strcmp(chave, no.C[i]);
+    if (strlen(no.C[i]) == 0){
+        cmp = -1;
+    }
+    if (no.P[i] != -1 && cmp < 0) {
+        BuscaPai(indice, no.P[i], chave, no.RRNdoNO);
+    } else if (no.P[i + 1] != -1) {
+        BuscaPai(indice, no.P[i+1], chave,  no.RRNdoNO);
+    }
+}
+
+// Node no - No que vai ser splitado; Char* newKey - Chave que vai entrar no nó
+btree_header InsereOverflow(FILE* indice, btree_header bHeader, Node* no, char* newKey, int PR, int P) {
+    // Verifica se ta no nó raiz, se estiver, splita e cria outro nó
+    int RRN_pai = BuscaPai(indice, bHeader.noRaiz, no->C[0], -1);
+    Node pai;
+    if (RRN_pai != -1){
+        read_node(indice, &pai, RRN_pai);
+    }
+    
+    // Com o nó pai, ordenar o no a ser splitado e alocar a chave na posição [1] no pai
+    Node auxiliar = criaNode();
+    int pos = 0;
+    while (pos < no->nroChavesNo && strcmp(newKey, no->C[pos]) > 0) {
+        pos++;
+    }
+
+    char temp[4][256];
+    int PRtemp[4];
+    int Ptemp[5];
+
+
+    // Preenche os vetores temp com as chaves e seus respectivos PR e P
+    for (int i = 0; i < 4; i++) {
+        if (i != 3) {
+            strcpy(temp[i], no->C[i]);
+            PRtemp[i] = no->PR[i];
+            Ptemp[i] = no->P[i];
+        } else if (i == 3) {
+            strcpy(temp[i], newKey);
+            PRtemp[i] = PR;
+            Ptemp[i] = no->P[i];  // Defina o valor apropriado para o ponteiro
+            Ptemp[i + 1] = P;
+        } 
+    }
+
+
+    for (int i = 3; i >= pos; i--) {
+        if (i != pos){
+            strcpy(temp[i], temp[i - 1]);
+            PRtemp[i] = PRtemp[i - 1];
+            Ptemp[i + 1] = Ptemp[i];
+        } else {
+            strcpy(temp[i], newKey);
+            PRtemp[i] =  PR;
+            Ptemp[i + 1] = P;
+        }
+    }
+    // Cria novo nó
+    auxiliar.P[0] = Ptemp[2];
+    auxiliar.PR[0] = PRtemp[2];
+    strcpy(auxiliar.C[0], temp[2]);
+    auxiliar.P[1] =  Ptemp[3];
+    auxiliar.PR[1] = PRtemp[3];
+    strcpy(auxiliar.C[1], temp[3]);
+    auxiliar.P[2] = Ptemp[4];
+    auxiliar.alturaNo = no->alturaNo;
+    auxiliar.nroChavesNo = 2;
+    auxiliar.RRNdoNO = bHeader.RRNproxNo;
+    bHeader.RRNproxNo++;
+    int ptr = no->PR[1];
+    for (int i = 0; i < 3; i++) {
+        no->P[i] = -1;
+        no->P[i + 1] = -1;
+        no->C[i][0] = '\0';
+        no->PR[i] = -1;
+    }
+
+    no->P[0] = Ptemp[0];
+    strcpy(no->C[0], temp[0]);
+    no->PR[0] = PRtemp[0];
+    no->P[1] = Ptemp[1];
+    no->nroChavesNo = 1;
+    if (no->alturaNo == 1){
+        for (int j = 0; j < 4; j++){
+            no->P[j] = -1;
+        }
+    }
+    // Fazer isso recursivamente até o nó tiver espaço ou for o nó raiz    
+
+    if (pai.nroChavesNo == 3 || RRN_pai == -1){
+        if (RRN_pai != -1){
+            pai.alturaNo = no->alturaNo + 1;
+            bHeader = InsereOverflow(indice, bHeader, &pai, temp[1], PRtemp[1], auxiliar.RRNdoNO);
+        } else {
+            Node raiz = criaNode();
+            raiz.alturaNo = (no->alturaNo + 1);
+            raiz.nroChavesNo = 1;
+            raiz.RRNdoNO = bHeader.RRNproxNo;
+            bHeader.RRNproxNo++;
+            bHeader.noRaiz = raiz.RRNdoNO;
+            strcpy(raiz.C[0], temp[1]);
+            raiz.PR[0] = PRtemp[1];
+            raiz.P[0] = no->RRNdoNO;
+            raiz.P[1] = auxiliar.RRNdoNO;
+            escreve_node(indice, &raiz);
+        }
+        
+    } else {
+        insereNoIndice(&pai, temp[1], PRtemp[1], auxiliar.RRNdoNO);
+        escreve_node(indice, &pai);
+    }
+
+    // Apaga os registros do no, com excecao do na primeira posicao
+    
+    escreve_node(indice, no);
+    escreve_node(indice, &auxiliar);
+
+    return bHeader;
+}
+
+btree_header InserirNo(FILE *indice, char* newKey, int PR){
     // 1. Procurar a folha onde a chave deve ser inserida
-
+    Node no;
+    int cresceu;
+    btree_header bHeader = LerHeader(indice);
+    if (bHeader.noRaiz != -1){
+        no = BuscaNoFolha(indice, bHeader.noRaiz, newKey); // Procura o nó folha que a chave deveria ser inserido e atribui o nó a no
+    } else {
+        // Caso da árvore Vazia
+        no = criaNode();
+        bHeader.noRaiz = 0;
+        bHeader.RRNproxNo++;
+    }
+    
     // 2. Inserir a chave na folha
-
-    // 3. Atualizar a árvore subindo até a raiz, se necessário
-
-    // 4. Se a raiz foi dividida, criar uma nova raiz
-
+    if (no.nroChavesNo != 3){
+        insereNoIndice(&no, newKey, PR, -1);
+        escreve_node(indice, &no);
+    } else { // Overflow
+        // split
+        bHeader = InsereOverflow(indice, bHeader, &no, newKey, PR, -1);
+    }
+    escreve_btree_header(indice, &bHeader);
+    return bHeader;
 }

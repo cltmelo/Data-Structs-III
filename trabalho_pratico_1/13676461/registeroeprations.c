@@ -138,7 +138,7 @@ void escreverRegistro(FILE *arquivo, const Registro *registro){
 
 int lerCabecalho(FILE* arquivo, Cabecalho* c){
 
-    if(fread(&c->status, sizeof(char), 1, arquivo) == 0)
+    if(fread(&(c->status), sizeof(char), 1, arquivo) == 0)
         return 0; //fim do arquivo
 
     fread(&c->proxRRN, sizeof(int), 1, arquivo);
