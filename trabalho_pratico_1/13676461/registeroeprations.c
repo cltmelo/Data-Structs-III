@@ -43,7 +43,22 @@ void fecharArquivo(FILE *arquivo){
     }
 }
 
+void removeAspas(char *str) {
+    int len = strlen(str);
+    int j = 0;
 
+    // Percorre a string original
+    for (int i = 0; i < len; i++) {
+        // Copia apenas os caracteres que não são aspas
+        if (str[i] != '"') {
+            str[j] = str[i];
+            j++;
+        }
+    }
+
+    // Adiciona o caractere nulo ao final da nova string
+    str[j] = '\0';
+}
 Registro* inicializarRegistro(){
     Registro *r = (Registro*)malloc(sizeof(Registro));
     if (r == NULL) {

@@ -299,7 +299,129 @@ void btreeCreateTable(){
 
 // Funcionalidade 6 
 void btreeSelect(){
+    char arq_bin[GLOBAL];
+    char arq_indice[GLOBAL];
+    int qnt;
+    int busca = 0;
+    scanf("%s", arq_bin);
+    scanf("%s", arq_indice);
+    scanf("%d", &qnt);
+    FILE* bin = abrirArquivoLeitura(arq_bin);
+    FILE* indice = abrirArquivoLeitura(arq_indice);
+    char campo[GLOBAL];
+    char temp[GLOBAL];
+    Cabecalho cabecalho;
+    lerCabecalho(bin, &cabecalho);
+    btree_header bHeader = LerHeader(indice);
+    if (bHeader.status == '0'){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+    Registro *registro = inicializarRegistro();
+    for (int i = 0; i < qnt; i++){
+        busca = 0;
+        fseek(bin, TAM_CABECALHO, SEEK_SET);
+        scanf("%s%s", campo, temp);
+        removeAspas(temp);
+        int cmp = strcmp(campo, "nomeTecnologiaOrigemDestino");
+        if (cmp == 0){
+            int aux = Busca(indice, temp, bHeader.noRaiz);
+            if (aux == -1){
+                printf("Registro inexistente.\n");
+            } else {
+                fseek(bin, byte_offset(aux), SEEK_SET);
+                fread(&(registro->removido), sizeof(char), 1, bin);
+                fread(&(registro->grupo), sizeof(int), 1, bin);
+                fread(&(registro->popularidade), sizeof(int), 1, bin);
+                fread(&(registro->peso), sizeof(int), 1, bin);
+                
+                fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+                registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+                fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+                registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
 
+
+                fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+                registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+                fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+                registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+
+                int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+
+                if (registro->removido == '0'){
+                    printRegister(registro);
+                } 
+            }          
+        } else {
+            while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+                fread(&(registro->grupo), sizeof(int), 1, bin);
+                fread(&(registro->popularidade), sizeof(int), 1, bin);
+                fread(&(registro->peso), sizeof(int), 1, bin);
+                
+                fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+                registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+                fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+                registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+
+
+                fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+                registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+                fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+                registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+                int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+                char resto[TAM_REGISTRO-tamRegistro];
+                fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
+                if (registro->removido == '0'){
+                    cmp = strcmp(campo, "nomeTecnologiaOrigem");
+                    if (cmp == 0){
+                        if (strcmp(temp, registro->tecnologiaOrigem.string) == 0){
+                            printRegister(registro);
+                            busca++;
+                        }
+                    }
+                    cmp = strcmp(campo, "nomeTecnologiaDestino");
+                    if (cmp == 0){
+                        if (strcmp(temp, registro->tecnologiaDestino.string) == 0){
+                            printRegister(registro);
+                            busca++;
+                        }
+                    }
+                    cmp = strcmp(campo, "popularidade");
+                    if (cmp == 0){
+                        if (registro->popularidade == atoi(temp)){
+                            printRegister(registro);
+                            busca++;
+                        }
+                    }
+                    cmp = strcmp(campo, "grupo");
+                    if (cmp == 0){
+                        if (registro->grupo == atoi(temp)){
+                            printRegister(registro);
+                            busca++;
+                        }
+                    }
+                    cmp = strcmp(campo, "peso");
+                    if (cmp == 0){
+                        if (registro->peso == atoi(temp)){
+                            printRegister(registro);
+                            busca++;
+                        }
+                    }
+                    
+                    
+                }       
+                
+            }
+            if (busca == 0){
+                printf("Registro inexistente.\n");
+            }
+        }
+        
+
+
+    }
+    fecharArquivo(bin);
+    fecharArquivo(indice);
 }
 
 // Funcionalidade 7

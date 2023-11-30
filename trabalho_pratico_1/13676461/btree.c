@@ -133,9 +133,11 @@ int Busca(FILE* indice, char *chave, int RRN) {
 
     if (strcmp(chave, no.C[i]) == 0) {
         // A chave está presente na árvore
-        return no.RRNdoNO;
+        return no.PR[i];
     } 
-
+    if (no.P[i] == -1){
+        return -1; // Não há chave!!!
+    }
     return Busca(indice, chave, no.P[i]);
 }
 

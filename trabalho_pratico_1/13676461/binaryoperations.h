@@ -30,6 +30,6 @@ void LerBIN();
 void selectWhere();
 void buscarRRN();
 void btreeCreateTable();
-void btreeSelectWhere();
+void btreeSelect();
 void InserctInto();
 #endif // BINARYOPERATIONS_H_INCLUDED

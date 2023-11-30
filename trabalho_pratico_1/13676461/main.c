@@ -38,13 +38,15 @@ int main(){
     case 5:
         btreeCreateTable();
         break;
+    case 6:
+        btreeSelect();
+        break;
     case 7:
         InsertInto();
         break;
     default:
         printf("Comando inexistente.\n");
     }
-
 
     /*btree_header bHeader = criarArvoreB();
     FILE* indice = abrirArquivoEscrita("teste.bin");

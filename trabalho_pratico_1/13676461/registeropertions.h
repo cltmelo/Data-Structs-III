@@ -80,6 +80,7 @@ int lerCabecalho(FILE* arquivo, Cabecalho* c);
 
 // Função para atualizar as informações do cabeçalho
 void atualizaCabecalho(Registro* registro, Cabecalho* cabecalho);
+void removeAspas(char *str);
 
 // Função para imprimir o registro de dados
 void printRegister(Registro *registro);
