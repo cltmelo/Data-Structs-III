@@ -38,6 +38,9 @@ int main(){
     case 5:
         btreeCreateTable();
         break;
+    case 7:
+        InsertInto();
+        break;
     default:
         printf("Comando inexistente.\n");
     }

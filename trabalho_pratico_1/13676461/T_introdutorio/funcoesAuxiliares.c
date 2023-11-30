@@ -35,7 +35,6 @@ void insere_lista_final(Lista *li, data *x){
     if (no == NULL){
         return;
     }
-
     // no->valor = x; //alterar aqui pra dar bom
     no->valor = malloc( (strlen(x) + 1)*sizeof(data) );
     no->prox = NULL;

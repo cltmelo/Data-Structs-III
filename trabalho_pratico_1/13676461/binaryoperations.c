@@ -51,7 +51,7 @@ void criaTable(){
 
     }
 
-    cabecalho->nroTecnologias = tamanho_lista(lista) -1;
+    cabecalho->nroTecnologias = tamanho_lista(lista);
 
     cabecalho->status = REMOVIDO; //atualiza o status do cabeçalho como logicamente removido
 
@@ -104,6 +104,7 @@ void LerBIN() {
         fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);
         if (registro->removido == '0'){
             printRegister(registro);
+            
         }       
         
     }
@@ -255,10 +256,8 @@ void btreeCreateTable(){
     escreve_btree_header(indice, &bHeader);
     Registro* registro = inicializarRegistro();
     Cabecalho* cabecalho = inicializarCabecalho();
-    if(!lerCabecalho(bin, cabecalho)){
-        printf("Registro Inexistente.\n");
-        return;
-    }
+    fseek(bin, 0, SEEK_SET); 
+    lerCabecalho(bin, cabecalho);
     int RRN = 0;
     int chaves = 0;
     while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
@@ -305,17 +304,117 @@ void btreeSelect(){
 
 // Funcionalidade 7
 void InsertInto(){
-    /*int quantidade;
+    int quantidade;
     char arq_bin[GLOBAL];
     char arq_indice[GLOBAL];
     scanf("%s", arq_bin);
     scanf("%s", arq_indice);
     scanf("%d", &quantidade);
-    FILE *indice = abrirArquivoEscrita(arq_indice);
+    FILE *indice  = fopen(arq_indice, "rb+");
     FILE *bin = abrirArquivoLeitura(arq_bin);
-    Registro *Registro = inicializarRegistro();
-    scanf("%s, %s, %s, %s ")
+    Registro *registro = inicializarRegistro();
+    Cabecalho *cabecalho = inicializarCabecalho();
+    Lista *lista = cria_lista();
+    if(!lerCabecalho(bin, cabecalho)){
+        printf("Registro Inexistente.\n");
+        return;
+    }
+    
+    while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+        fread(&(registro->grupo), sizeof(int), 1, bin);
+        fread(&(registro->popularidade), sizeof(int), 1, bin);
+        fread(&(registro->peso), sizeof(int), 1, bin);
+        
+        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+        registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+        registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+
+
+        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+        registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+        registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+
+        int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+        char resto[TAM_REGISTRO-tamRegistro];
+        fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
+        if (registro->removido == '0'){
+            if((registro->tecnologiaDestino.tamanho) != 0) {
+                insere_lista_final(lista, registro->tecnologiaDestino.string);
+            }
+            if(registro->tecnologiaOrigem.tamanho != 0){
+                insere_lista_final(lista, registro->tecnologiaOrigem.string);
+            }
+        }  
+    }
+    fecharArquivo(bin);
+    bin = fopen(arq_bin, "rb+");
+    fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
+    btree_header bHeader = LerHeader(indice);
+    char nomeTecnologiaOrigem[100], grupo[100], popularidade[100], nomeTecnologiaDestino[100], peso[100];
     for (int i = 0; i < quantidade; i++){
-        scanf("%s")
-    }*/
+        scanf("\n%[^,], %[^,], %[^,], %[^,], %s", nomeTecnologiaOrigem, grupo, popularidade, nomeTecnologiaDestino, peso);
+        if (strcmp(nomeTecnologiaOrigem, "NULO") != 0){
+            strcpy(registro->tecnologiaOrigem.string, nomeTecnologiaOrigem);
+            registro->tecnologiaOrigem.tamanho = strlen(nomeTecnologiaOrigem);
+        } else {
+            registro->tecnologiaOrigem.string[0] = '\0';
+            registro->tecnologiaOrigem.tamanho = 0;
+        }
+        if (strcmp(nomeTecnologiaDestino, "NULO") != 0){
+            strcpy(registro->tecnologiaDestino.string, nomeTecnologiaDestino);
+            registro->tecnologiaDestino.tamanho = strlen(nomeTecnologiaDestino);
+        } else {
+            registro->tecnologiaDestino.string[0] = '\0';
+            registro->tecnologiaDestino.tamanho = 0;
+        }
+        if (strcmp(popularidade, "NULO") != 0){
+            registro->popularidade = atoi(popularidade);
+        } else {
+            registro->popularidade = -1;
+        }
+        if (strcmp(peso, "NULO") != 0){
+            registro->peso = atoi(peso);
+        } else {
+            registro->peso = -1;
+        }
+        if (strcmp(grupo, "NULO") != 0){
+            registro->grupo = atoi(grupo);
+        } else {
+            registro->grupo = -1;
+        }
+        if((registro->tecnologiaDestino.tamanho) != 0) {
+            insere_lista_final(lista, registro->tecnologiaDestino.string);
+        }
+        if((registro->tecnologiaOrigem.tamanho) != 0){
+            insere_lista_final(lista, registro->tecnologiaOrigem.string);
+        }
+        registro->removido = '0';
+        escreverRegistro(bin, registro);
+        if (registro->removido == NAO_REMOVIDO && registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0){
+            char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
+            strcpy(concat, registro->tecnologiaOrigem.string);
+            strcat(concat, registro->tecnologiaDestino.string);
+            bHeader = InserirNo(indice, concat, cabecalho->proxRRN);
+        }
+        atualizaCabecalho(registro, cabecalho);
+    }
+
+    cabecalho->nroTecnologias = tamanho_lista(lista);
+    cabecalho->status = REMOVIDO; //atualiza o status do cabeçalho como logicamente removido
+    fseek(bin, 0, SEEK_SET);
+    escreverCabecalho(bin, cabecalho);
+    fecharArquivo(bin);
+    //Fechando os arquivos de dados
+    //imprimeLista(lista);
+    //liberando memoria alocada (lista ligada)
+    libera_lista(lista);
+    //REQUISITO DO ENUNCIADO
+    binarioNaTela(arq_bin);
+    bHeader.status = '1';
+    escreve_btree_header(indice, &bHeader);
+    fecharArquivo(indice);
+    binarioNaTela(arq_indice);
+
 }

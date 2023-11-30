@@ -27,34 +27,48 @@ void libera_lista(Lista* li){
     }
 }
 
-void insere_lista_final(Lista *li, data *x){
-    if (li == NULL){
-        return;
-    }
-    Elem* no = (Elem*) malloc(sizeof(Elem));
-    if (no == NULL){
+void insere_lista_final(Lista *li, data *x) {
+    if (li == NULL) {
+        // Retorna algo apropriado em caso de erro
         return;
     }
 
-    // no->valor = x; //alterar aqui pra dar bom
-    no->valor = malloc( (strlen(x) + 1)*sizeof(data) );
-    no->prox = NULL;
-    if((*li) == NULL){
-        *li = no;
+    Elem* no = (Elem*) malloc(sizeof(Elem));
+    if (no == NULL) {
+        // Retorna algo apropriado em caso de erro
+        return;
     }
-    else {
+
+    // Aloca espaço para o valor e copia o conteúdo de x
+    no->valor = (data*)malloc((strlen(x) + 1) * sizeof(data));
+    strcpy(no->valor, x);
+    
+    no->prox = NULL;
+
+    if ((*li) == NULL) {
+        *li = no;
+    } else {
         Elem *aux = *li;
-        while (aux->prox != NULL){
-            if (strcmp(aux->valor, x) == 0){
-                return;
+
+        // Verifica se o valor já existe na lista
+        while (aux->prox != NULL) {
+            if (strcmp(aux->valor, x) == 0) {
+                free(no->valor); // Liberar a memória alocada para o valor
+                free(no); // Liberar a memória alocada para o nó
+                return; // Valor já existe, não insere
             }
             aux = aux->prox;
+        }
 
+        // Verifica o último elemento da lista
+        if (strcmp(aux->valor, x) == 0) {
+            free(no->valor); // Liberar a memória alocada para o valor
+            free(no); // Liberar a memória alocada para o nó
+            return; // Valor já existe, não insere
         }
-        if (strcmp(aux->valor, x) != 0){
-            no->valor = x;
-            aux->prox = no;
-        }
+
+        // Valor não encontrado, insere no final da lista
+        aux->prox = no;
     }
 }
 

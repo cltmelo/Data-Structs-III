@@ -59,6 +59,8 @@
   "files.associations": {
     "stdlib.h": "c",
     "stdio.h": "c",
-    "funcoesauxiliares.h": "c"
+    "funcoesauxiliares.h": "c",
+    "funcoesfornecidas.h": "c",
+    "string.h": "c"
   }
 }
