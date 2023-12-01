@@ -33,7 +33,7 @@ void criaTable(){
     Cabecalho *cabecalho = inicializarCabecalho();
     char input[GLOBAL];
     //Pular o cabeçalho do .csv
-    fgets(input, sizeof(input), csv);
+     fgets(input, sizeof(input), csv);
     escreverCabecalho(bin, cabecalho);
     while (fgets(input, sizeof(input), csv) != NULL) {
         // Divide a string para struct registro. preenchendo os campos vazios com NULL
@@ -260,6 +260,7 @@ void btreeCreateTable(){
     lerCabecalho(bin, cabecalho);
     int RRN = 0;
     int chaves = 0;
+    Node no = criaNode();
     while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
         fread(&(registro->grupo), sizeof(int), 1, bin);
         fread(&(registro->popularidade), sizeof(int), 1, bin);
@@ -283,13 +284,14 @@ void btreeCreateTable(){
             char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
             strcpy(concat, registro->tecnologiaOrigem.string);
             strcat(concat, registro->tecnologiaDestino.string);
-            bHeader = InserirNo(indice, concat, RRN);
+            bHeader = LerHeader(indice);
+            InserirNo(indice, concat, RRN, no, -1, bHeader);
         }
         free(registro->tecnologiaOrigem.string);
         free(registro->tecnologiaDestino.string);
         RRN++;
     }
-
+    bHeader = LerHeader(indice);
     bHeader.status = '1';
     escreve_btree_header(indice, &bHeader);
     fecharArquivo(bin);
@@ -474,6 +476,7 @@ void InsertInto(){
     bin = fopen(arq_bin, "rb+");
     fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
     btree_header bHeader = LerHeader(indice);
+    Node no = criaNode();
     char nomeTecnologiaOrigem[100], grupo[100], popularidade[100], nomeTecnologiaDestino[100], peso[100];
     for (int i = 0; i < quantidade; i++){
         scanf("\n%[^,], %[^,], %[^,], %[^,], %s", nomeTecnologiaOrigem, grupo, popularidade, nomeTecnologiaDestino, peso);
@@ -518,7 +521,8 @@ void InsertInto(){
             char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
             strcpy(concat, registro->tecnologiaOrigem.string);
             strcat(concat, registro->tecnologiaDestino.string);
-            bHeader = InserirNo(indice, concat, cabecalho->proxRRN);
+            bHeader = LerHeader(indice);
+            InserirNo(indice, concat, cabecalho->proxRRN, no, -1, bHeader);
         }
         atualizaCabecalho(registro, cabecalho);
     }
@@ -534,6 +538,7 @@ void InsertInto(){
     libera_lista(lista);
     //REQUISITO DO ENUNCIADO
     binarioNaTela(arq_bin);
+    bHeader = LerHeader(indice);
     bHeader.status = '1';
     escreve_btree_header(indice, &bHeader);
     fecharArquivo(indice);

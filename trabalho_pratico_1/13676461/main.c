@@ -48,20 +48,6 @@ int main(){
         printf("Comando inexistente.\n");
     }
 
-    /*btree_header bHeader = criarArvoreB();
-    FILE* indice = abrirArquivoEscrita("teste.bin");
-    escreve_btree_header(indice, &bHeader);
-    int i = 0;
-    char temp[51];
-    while (i != -1){
-        scanf("%d", &i);
-        if (i == -1){
-            break;
-        }
-        scanf("%s", &temp);
-        InserirNo(indice, &temp, i);
-    }
-    fclose(indice);*/
     
     return 0;
 }
