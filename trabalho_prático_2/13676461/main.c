@@ -45,7 +45,7 @@ int main(){
         InsertInto();
         break;
     case 8:
-        criaGraph();
+        CriaGraph();
         break;
     default:
         printf("Comando inexistente.\n");
