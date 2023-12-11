@@ -47,6 +47,12 @@ int main(){
     case 8:
         CriaGraph();
         break;
+    case 9:
+        CriaGraphT();
+        break;
+    case 10:
+        TecnologiasGerada();
+        break;
     default:
         printf("Comando inexistente.\n");
     }

@@ -555,43 +555,11 @@ void CriaGraph(){
 
     FILE* bin = abrirArquivoLeitura(arq_bin);
     
-    Registro* registro = inicializarRegistro();
-    Cabecalho* cabecalho = inicializarCabecalho();
-
-    if(!lerCabecalho(bin, cabecalho)){
-        printf("Registro Inexistente.\n");
-        return;
-    }
     
-    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias, 20);
     Lista *lista = cria_lista();
-    while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
-        fread(&(registro->grupo), sizeof(int), 1, bin);
-        fread(&(registro->popularidade), sizeof(int), 1, bin);
-        fread(&(registro->peso), sizeof(int), 1, bin);
-        
-        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
-        registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
-        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
-        registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
 
-
-        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
-        registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
-        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
-        registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
-
-        int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
-        char resto[TAM_REGISTRO-tamRegistro];
-        fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
-        if (registro->removido == NAO_REMOVIDO && registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0){
-            insere_lista_final(lista, registro->tecnologiaOrigem.string);
-            insere_lista_final(lista, registro->tecnologiaDestino.string);
-
-            insereAresta(gr, busca_sequencial(lista, registro->tecnologiaOrigem.string), busca_sequencial(lista, registro->tecnologiaDestino.string), registro->peso, registro->grupo);
-        }
-    }
-
+    Grafo* gr = geraGrafo(bin, lista);
+    
     imprime_Grafo(gr, lista);
     libera_Grafo(gr);
     fecharArquivo(bin);
@@ -607,46 +575,47 @@ void CriaGraphT(){
 
     FILE* bin = abrirArquivoLeitura(arq_bin);
     
-    Registro* registro = inicializarRegistro();
-    Cabecalho* cabecalho = inicializarCabecalho();
-
-    if(!lerCabecalho(bin, cabecalho)){
-        printf("Registro Inexistente.\n");
-        return;
-    }
     
-    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias, 20);
     Lista *lista = cria_lista();
-    while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
-        fread(&(registro->grupo), sizeof(int), 1, bin);
-        fread(&(registro->popularidade), sizeof(int), 1, bin);
-        fread(&(registro->peso), sizeof(int), 1, bin);
-        
-        fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
-        registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
-        fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
-        registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
 
-
-        fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
-        registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
-        fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
-        registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
-
-        int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
-        char resto[TAM_REGISTRO-tamRegistro];
-        fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
-        if (registro->removido == NAO_REMOVIDO && registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0){
-            insere_lista_final(lista, registro->tecnologiaOrigem.string);
-            insere_lista_final(lista, registro->tecnologiaDestino.string);
-
-            insereAresta(gr, busca_sequencial(lista, registro->tecnologiaOrigem.string), busca_sequencial(lista, registro->tecnologiaDestino.string), registro->peso, registro->grupo);
-        }
-    }
+    Grafo* gr = geraGrafo(bin, lista);
     
     imprime_GrafoT(gr, lista);
     libera_Grafo(gr);
     fecharArquivo(bin);
+
+
+}
+
+
+void TecnologiasGerada(){
+    char arq_bin[GLOBAL];
+
+    scanf("%s", arq_bin);
+
+    FILE* bin = abrirArquivoLeitura(arq_bin);
+    
+    
+    Lista *lista = cria_lista();
+
+    Grafo* gr = geraGrafo(bin, lista);
+    char tec[GLOBAL];
+    int quantidade;
+    scanf("%d", &quantidade);
+    for (int i = 0; i < quantidade; i++){
+        scanf("%s", tec);
+        removeAspas(tec);
+        imprimirTecGerada(gr, lista, tec);
+    }
+
+    
+    libera_Grafo(gr);
+    fecharArquivo(bin);
+
+}
+
+
+void BuscaCaminho(){
 
 
 }

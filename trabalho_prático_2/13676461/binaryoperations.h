@@ -34,5 +34,7 @@ void btreeSelect();
 void InserctInto();
 void CriaGraph();
 void CriaGraphT();
+void TecnologiasGerada();
+void BuscaCaminho();
 
 #endif // BINARYOPERATIONS_H_INCLUDED

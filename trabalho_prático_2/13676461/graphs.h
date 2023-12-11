@@ -11,5 +11,9 @@ void menorCaminho_Grafo(Grafo *gr, int ini, int *antecessor, float *distancia);
 
 void imprime_Grafo(Grafo *gr, Lista *li);
 void imprime_GrafoT(Grafo *gr, Lista *li);
+Grafo*  geraGrafo(FILE* bin, Lista* lista);
+void imprimirTecGerada(Grafo *gr, Lista *li, char* tec);
+
+
 
 #endif
