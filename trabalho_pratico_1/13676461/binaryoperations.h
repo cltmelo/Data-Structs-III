@@ -10,13 +10,7 @@
 #ifndef BINARYOPERATIONS_H_INCLUDED
 #define BINARYOPERATIONS_H_INCLUDED
 
-
-// #include "../includes/funcoesFornecidas.h"
-// #include "../includes/registeropertions.h"
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
-
+#define GLOBAL 256 //Só uma varável global aleatória para os arrays de nome de arquivo
 /*
 OBS:
 Os valores nulos nos campos inteiros de tamanho fixo devem ser devem ser

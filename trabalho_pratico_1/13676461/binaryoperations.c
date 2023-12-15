@@ -11,8 +11,6 @@
 #include "funcoesAuxiliares.h"
 #include "btree.h"
 
-#define GLOBAL 256 //Só uma varável global aleatória para os arrays de nome de arquivo
-
 //Funcionalidade 1
 void criaTable(){
     char arq_csv[GLOBAL];
@@ -193,6 +191,97 @@ void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por ca
     fecharArquivo(bin); // Fechar arquivo
 }
 */
+//Funcionalidade 3
+void selectWhere() {
+    char arq_bin[GLOBAL];
+    int qnt;
+    int busca = 0;
+    scanf("%s", arq_bin);
+    scanf("%d", &qnt);
+    FILE* bin = abrirArquivoLeitura(arq_bin);
+    char campo[GLOBAL];
+    char temp[GLOBAL];
+    Cabecalho cabecalho;
+    if(!lerCabecalho(bin, &cabecalho)){
+        printf("Registro Inexistente.\n");
+        return;
+    }
+    Registro *registro = inicializarRegistro();
+    for (int i = 0; i < qnt; i++){
+        busca = 0;
+        fseek(bin, TAM_CABECALHO, SEEK_SET);
+        scanf("%s%s", campo, temp);
+        removeAspas(temp);
+        int cmp;
+        while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+            fread(&(registro->grupo), sizeof(int), 1, bin);
+            fread(&(registro->popularidade), sizeof(int), 1, bin);
+            fread(&(registro->peso), sizeof(int), 1, bin);
+            
+            fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+            registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+            fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+            registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+
+
+            fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+            registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+            fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+            registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+            int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+            char resto[TAM_REGISTRO-tamRegistro];
+            fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
+            if (registro->removido == NAO_REMOVIDO){
+                cmp = strcmp(campo, "nomeTecnologiaOrigem");
+                if (cmp == 0){
+                    if (strcmp(temp, registro->tecnologiaOrigem.string) == 0){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "nomeTecnologiaDestino");
+                if (cmp == 0){
+                    if (strcmp(temp, registro->tecnologiaDestino.string) == 0){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "popularidade");
+                if (cmp == 0){
+                    if (registro->popularidade == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "grupo");
+                if (cmp == 0){
+                    if (registro->grupo == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "peso");
+                if (cmp == 0){
+                    if (registro->peso == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                
+                
+            }       
+            
+        }
+        if (busca == 0){
+            printf("Registro inexistente.\n");
+        }
+        
+
+
+    }
+    fecharArquivo(bin);
+}
+
 
 //Funcionalidade 4
 void buscarRRN(){
@@ -269,7 +358,11 @@ void btreeCreateTable(){
     Registro* registro = inicializarRegistro();
     Cabecalho* cabecalho = inicializarCabecalho();
     fseek(bin, 0, SEEK_SET); 
-    lerCabecalho(bin, cabecalho);
+    // lerCabecalho(bin, cabecalho);
+    if (!lerCabecalho(bin, cabecalho)) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     int RRN = 0;
     int chaves = 0;
     Node no = criaNode();
@@ -327,7 +420,7 @@ void btreeSelect(){
     char temp[GLOBAL];
     Cabecalho cabecalho;
     if(!lerCabecalho(bin, &cabecalho)){
-        printf("Registro Inexistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
     btree_header bHeader = LerHeader(indice);
@@ -470,8 +563,9 @@ void InsertInto(){
     Registro *registro = inicializarRegistro();
     Cabecalho *cabecalho = inicializarCabecalho();
     Lista *lista = cria_lista();
+
     if(!lerCabecalho(bin, cabecalho)){
-        printf("Registro Inexistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
     
@@ -505,8 +599,12 @@ void InsertInto(){
     }
     // fecharArquivo(bin);
     // bin = fopen(arq_bin, "rb+");
-    fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
+    // fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
     btree_header bHeader = LerHeader(indice);
+    if (bHeader.status == '0') {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     Node no = criaNode();
     char nomeTecnologiaOrigem[100], grupo[100], popularidade[100], nomeTecnologiaDestino[100], peso[100];
     for (int i = 0; i < quantidade; i++){
@@ -568,7 +666,7 @@ void InsertInto(){
     libera_lista(lista);
     //REQUISITO DO ENUNCIADO
     binarioNaTela(arq_bin);
-    bHeader.status = '1';
+    bHeader.status = '1'; //CONSISTENTE
     escreve_btree_header(indice, &bHeader);
     fecharArquivo(indice);
     binarioNaTela(arq_indice);

@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/lucas/ED3/trabalho_pratico_1/tmp_teste2",
-      "program": "/home/lucas/ED3/trabalho_pratico_1/tmp_teste2/build/Debug/outDebug",
+      "cwd": "/home/lucas/ED3/trabalho_pratico_1/13676461",
+      "program": "/home/lucas/ED3/trabalho_pratico_1/13676461/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
