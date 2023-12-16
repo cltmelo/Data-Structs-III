@@ -1,19 +1,16 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #include "binaryoperations.h"
 #include "funcoesAuxiliares.h"
 #include "btree.h"
 #include "graphs.h"
-/*
-----------------------------------------------------------------------------------------------------------------------------------
-Funcionalidades do algoritmo: 
-    1. Create Table (criaTable)
-    2. Select From
-    3. Select Where
-    4. Select RRN (bucarRRN)
-----------------------------------------------------------------------------------------------------------------------------------
-*/
-
-
-#define GLOBAL 256 //Só uma varável global aleatória para os arrays de nome de arquivo
 
 //Funcionalidade 1
 void criaTable(){
@@ -103,7 +100,7 @@ void LerBIN() {
         int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
         char resto[TAM_REGISTRO-tamRegistro];
         fread(resto, 1, TAM_REGISTRO-tamRegistro, arquivo);
-        if (registro->removido == '0'){
+        if (registro->removido == NAO_REMOVIDO){
             printRegister(registro);
             
         }       
@@ -112,6 +109,7 @@ void LerBIN() {
     fecharArquivo(arquivo);
 }
 
+/*
 // Funcionalidade 3
 void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por causa da alocação dinâmica.
     char arq_bin[GLOBAL];
@@ -193,6 +191,97 @@ void selectWhere(){ // Pode ser deveras custosa em termos de disco, Jean, por ca
     //free(tmp); //pra que isso pae? utilizamos estática (acho qeu vai ser mais eficiente em termos de memória)
     fecharArquivo(bin); // Fechar arquivo
 }
+*/
+//Funcionalidade 3
+void selectWhere() {
+    char arq_bin[GLOBAL];
+    int qnt;
+    int busca = 0;
+    scanf("%s", arq_bin);
+    scanf("%d", &qnt);
+    FILE* bin = abrirArquivoLeitura(arq_bin);
+    char campo[GLOBAL];
+    char temp[GLOBAL];
+    Cabecalho cabecalho;
+    if(!lerCabecalho(bin, &cabecalho)){
+        printf("Registro Inexistente.\n");
+        return;
+    }
+    Registro *registro = inicializarRegistro();
+    for (int i = 0; i < qnt; i++){
+        busca = 0;
+        fseek(bin, TAM_CABECALHO, SEEK_SET);
+        scanf("%s%s", campo, temp);
+        removeAspas(temp);
+        int cmp;
+        while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
+            fread(&(registro->grupo), sizeof(int), 1, bin);
+            fread(&(registro->popularidade), sizeof(int), 1, bin);
+            fread(&(registro->peso), sizeof(int), 1, bin);
+            
+            fread(&(registro->tecnologiaOrigem.tamanho), sizeof(int), 1, bin);
+            registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
+            fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, bin);
+            registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
+
+
+            fread(&(registro->tecnologiaDestino.tamanho), sizeof(int), 1, bin);
+            registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
+            fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, bin);
+            registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
+            int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
+            char resto[TAM_REGISTRO-tamRegistro];
+            fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
+            if (registro->removido == NAO_REMOVIDO){
+                cmp = strcmp(campo, "nomeTecnologiaOrigem");
+                if (cmp == 0){
+                    if (strcmp(temp, registro->tecnologiaOrigem.string) == 0){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "nomeTecnologiaDestino");
+                if (cmp == 0){
+                    if (strcmp(temp, registro->tecnologiaDestino.string) == 0){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "popularidade");
+                if (cmp == 0){
+                    if (registro->popularidade == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "grupo");
+                if (cmp == 0){
+                    if (registro->grupo == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                cmp = strcmp(campo, "peso");
+                if (cmp == 0){
+                    if (registro->peso == atoi(temp)){
+                        printRegister(registro);
+                        busca++;
+                    }
+                }
+                
+                
+            }       
+            
+        }
+        if (busca == 0){
+            printf("Registro inexistente.\n");
+        }
+        
+
+
+    }
+    fecharArquivo(bin);
+}
 
 
 //Funcionalidade 4
@@ -208,8 +297,6 @@ void buscarRRN(){
     Cabecalho *cabecalho = inicializarCabecalho();
     Registro* registro = inicializarRegistro();   
 
-    
-
     lerCabecalho(arquivo, cabecalho);
     long pos = byte_offset(RRN);
     fseek(arquivo, pos, SEEK_SET);
@@ -222,12 +309,12 @@ void buscarRRN(){
                 fread(&registro->tecnologiaOrigem.tamanho, sizeof(int), 1, arquivo);
                 registro->tecnologiaOrigem.string = (char *)malloc(registro->tecnologiaOrigem.tamanho + 1);
                 fread(registro->tecnologiaOrigem.string, registro->tecnologiaOrigem.tamanho, 1, arquivo);
-                registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = '\0';
+                registro->tecnologiaOrigem.string[registro->tecnologiaOrigem.tamanho] = NULL_TERM;
 
                 fread(&registro->tecnologiaDestino.tamanho, sizeof(int), 1, arquivo);
                 registro->tecnologiaDestino.string = (char *)malloc(registro->tecnologiaDestino.tamanho + 1);
                 fread(registro->tecnologiaDestino.string, registro->tecnologiaDestino.tamanho, 1, arquivo);
-                registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = '\0';
+                registro->tecnologiaDestino.string[registro->tecnologiaDestino.tamanho] = NULL_TERM;
 
                 int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
                 char resto[TAM_REGISTRO-tamRegistro];
@@ -243,8 +330,10 @@ void buscarRRN(){
     fecharArquivo(arquivo);
 }
 
-
-// Funcionalidade 5
+/**
+ * @brief Funcionalidade 5: indexa a chave de busca definida sobre o arquivo de dados.
+ * 
+ */
 void btreeCreateTable(){
     char arq_bin[GLOBAL];
     char arq_indice[GLOBAL];
@@ -252,13 +341,29 @@ void btreeCreateTable(){
     scanf("%s", arq_indice);
 
     FILE *indice = abrirArquivoEscrita(arq_indice);
+    // FILE *indice;
+    // indice = fopen(arq_indice, "wb");
+    if (indice == NULL) {
+        // printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     FILE *bin = abrirArquivoLeitura(arq_bin);
+    // FILE *bin;
+    // bin = fopen(arq_bin, "rb");
+    if (bin == NULL) {
+        // printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     btree_header bHeader = criarArvoreB();
     escreve_btree_header(indice, &bHeader);
     Registro* registro = inicializarRegistro();
     Cabecalho* cabecalho = inicializarCabecalho();
     fseek(bin, 0, SEEK_SET); 
-    lerCabecalho(bin, cabecalho);
+    // lerCabecalho(bin, cabecalho);
+    if (!lerCabecalho(bin, cabecalho)) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     int RRN = 0;
     int chaves = 0;
     Node no = criaNode();
@@ -299,7 +404,9 @@ void btreeCreateTable(){
     binarioNaTela(arq_indice);
 }
 
-// Funcionalidade 6 
+/**
+ * @brief Funcionalidade 6: recupera dados de todos os registros de um arquivo de dados.
+ */
 void btreeSelect(){
     char arq_bin[GLOBAL];
     char arq_indice[GLOBAL];
@@ -314,7 +421,7 @@ void btreeSelect(){
     char temp[GLOBAL];
     Cabecalho cabecalho;
     if(!lerCabecalho(bin, &cabecalho)){
-        printf("Registro Inexistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
     btree_header bHeader = LerHeader(indice);
@@ -353,7 +460,7 @@ void btreeSelect(){
 
                 int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
 
-                if (registro->removido == '0'){
+                if (registro->removido == NAO_REMOVIDO){
                     printRegister(registro);
                 } 
             }          
@@ -376,7 +483,7 @@ void btreeSelect(){
                 int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
                 char resto[TAM_REGISTRO-tamRegistro];
                 fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
-                if (registro->removido == '0'){
+                if (registro->removido == NAO_REMOVIDO){
                     cmp = strcmp(campo, "nomeTecnologiaOrigem");
                     if (cmp == 0){
                         if (strcmp(temp, registro->tecnologiaOrigem.string) == 0){
@@ -429,7 +536,10 @@ void btreeSelect(){
     fecharArquivo(indice);
 }
 
-// Funcionalidade 7
+/**
+ * @brief Funcionalidade 7: insere novos registros no arquivo de dados, a qual deve ser realizada no final do arquivo.
+ * 
+ */
 void InsertInto(){
     int quantidade;
     char arq_bin[GLOBAL];
@@ -438,12 +548,25 @@ void InsertInto(){
     scanf("%s", arq_indice);
     scanf("%d", &quantidade);
     FILE *indice  = fopen(arq_indice, "rb+");
-    FILE *bin = abrirArquivoLeitura(arq_bin);
+    if (indice == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        fclose(indice);
+        return;
+    }
+    // FILE *bin = abrirArquivoLeitura(arq_bin);
+    FILE *bin;
+    bin = fopen(arq_bin, "rb+");
+    if (bin == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        fclose(bin);
+        return;
+    }
     Registro *registro = inicializarRegistro();
     Cabecalho *cabecalho = inicializarCabecalho();
     Lista *lista = cria_lista();
+
     if(!lerCabecalho(bin, cabecalho)){
-        printf("Registro Inexistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
     
@@ -466,7 +589,7 @@ void InsertInto(){
         int tamRegistro = TAM_REGISTRO_FIXO + registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho;
         char resto[TAM_REGISTRO-tamRegistro];
         fread(resto, 1, TAM_REGISTRO-tamRegistro, bin);
-        if (registro->removido == '0'){
+        if (registro->removido == NAO_REMOVIDO){
             if((registro->tecnologiaDestino.tamanho) != 0) {
                 insere_lista_final(lista, registro->tecnologiaDestino.string);
             }
@@ -475,10 +598,14 @@ void InsertInto(){
             }
         }  
     }
-    fecharArquivo(bin);
-    bin = fopen(arq_bin, "rb+");
-    fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
+    // fecharArquivo(bin);
+    // bin = fopen(arq_bin, "rb+");
+    // fseek(bin, byte_offset(cabecalho->proxRRN), SEEK_SET);
     btree_header bHeader = LerHeader(indice);
+    if (bHeader.status == '0') {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
     Node no = criaNode();
     char nomeTecnologiaOrigem[100], grupo[100], popularidade[100], nomeTecnologiaDestino[100], peso[100];
     for (int i = 0; i < quantidade; i++){
@@ -487,14 +614,14 @@ void InsertInto(){
             strcpy(registro->tecnologiaOrigem.string, nomeTecnologiaOrigem);
             registro->tecnologiaOrigem.tamanho = strlen(nomeTecnologiaOrigem);
         } else {
-            registro->tecnologiaOrigem.string[0] = '\0';
+            registro->tecnologiaOrigem.string[0] = NULL_TERM;
             registro->tecnologiaOrigem.tamanho = 0;
         }
         if (strcmp(nomeTecnologiaDestino, "NULO") != 0){
             strcpy(registro->tecnologiaDestino.string, nomeTecnologiaDestino);
             registro->tecnologiaDestino.tamanho = strlen(nomeTecnologiaDestino);
         } else {
-            registro->tecnologiaDestino.string[0] = '\0';
+            registro->tecnologiaDestino.string[0] = NULL_TERM;
             registro->tecnologiaDestino.tamanho = 0;
         }
         if (strcmp(popularidade, "NULO") != 0){
@@ -518,7 +645,7 @@ void InsertInto(){
         if((registro->tecnologiaOrigem.tamanho) != 0){
             insere_lista_final(lista, registro->tecnologiaOrigem.string);
         }
-        registro->removido = '0';
+        registro->removido = NAO_REMOVIDO;
         escreverRegistro(bin, registro);
         if (registro->removido == NAO_REMOVIDO && registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0){
             char concat[registro->tecnologiaDestino.tamanho + registro->tecnologiaOrigem.tamanho];
@@ -540,14 +667,14 @@ void InsertInto(){
     libera_lista(lista);
     //REQUISITO DO ENUNCIADO
     binarioNaTela(arq_bin);
-    bHeader.status = '1';
+    bHeader.status = '1'; //CONSISTENTE
     escreve_btree_header(indice, &bHeader);
     fecharArquivo(indice);
     binarioNaTela(arq_indice);
 
 }
 
-
+//funcionalidade 8
 void CriaGraph(){
     char arq_bin[GLOBAL];
 
@@ -568,6 +695,7 @@ void CriaGraph(){
 }
 
 
+//funcionalidade9
 void CriaGraphT(){
     char arq_bin[GLOBAL];
 
@@ -587,7 +715,7 @@ void CriaGraphT(){
 
 }
 
-
+//funcionalidade10
 void TecnologiasGerada(){
     char arq_bin[GLOBAL];
 
@@ -614,7 +742,7 @@ void TecnologiasGerada(){
 
 }
 
-
+//funcionalidade12
 void BuscaCaminho(){
 
 

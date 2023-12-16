@@ -2,16 +2,6 @@
 #include <stdlib.h>
 #include "graphs.h"
 #include "funcoesAuxiliares.h"
-//Definição do tipo Grafo
-struct grafo{
-    int nro_vertices;
-    int grau_max;
-    int** arestas;
-    float** pesos;
-    int* grau_entrada;
-    int* grau_saida;
-    int *grupo;
-};
 
 Grafo* cria_Grafo(int nro_vertices, int grau_max){
     Grafo *gr;
@@ -75,16 +65,16 @@ void imprime_Grafo(Grafo *gr, Lista *li){
     int i, j;
     int* aux = indicesEmOrdemAlfabetica(li, tamanho_lista(li));
 
-    for(i=0; i < gr->nro_vertices; i++){
+    for(i=0; i < gr->nro_vertices - 1; i++){
         for (int k = 0; k < tamanho_lista(li); k++){
             for(j=0; j < gr->grau_saida[aux[i] + 1]; j++){
                 if ((aux[k] + 1) == gr->arestas[aux[i] + 1][j]){
                     printTec(li, aux[i] + 1);
-                    printf(", ");
-                    printf("%d, ", gr->grupo[aux[i] + 1]);
-                    printf("%d, %d, %d, ", gr->grau_entrada[aux[i] + 1], gr->grau_saida[aux[i] + 1], gr->grau_saida[aux[i] + 1] + gr->grau_entrada[aux[i] + 1]);
+                    printf(" ");
+                    printf("%d ", gr->grupo[aux[i] + 1]);
+                    printf("%d %d %d ", gr->grau_entrada[aux[i] + 1], gr->grau_saida[aux[i] + 1], gr->grau_saida[aux[i] + 1] + gr->grau_entrada[aux[i] + 1]);
                     printTec(li, gr->arestas[aux[i] + 1][j]);
-                    printf(", %0.f", gr->pesos[aux[i] + 1][j]);
+                    printf(" %0.f", gr->pesos[aux[i] + 1][j]);
                     printf("\n");
                 }
                 
@@ -101,16 +91,16 @@ void imprime_GrafoT(Grafo *gr, Lista *li){
     int i, j;
     int* aux = indicesEmOrdemAlfabetica(li, tamanho_lista(li));
 
-    for(i=0; i < gr->nro_vertices; i++){
+    for(i=0; i < gr->nro_vertices - 1; i++){
         for (int k = 0; k < tamanho_lista(li); k++){
             for(j=0; j < gr->grau_saida[aux[i] + 1]; j++){
                 if ((aux[k] + 1) == gr->arestas[aux[i] + 1][j]){
                     printTec(li, aux[i] + 1);
-                    printf(", ");
-                    printf("%d, ", gr->grupo[aux[i] + 1]);
-                    printf("%d, %d, %d, ", gr->grau_entrada[aux[i] + 1], gr->grau_saida[aux[i] + 1], gr->grau_saida[aux[i] + 1] + gr->grau_entrada[aux[i] + 1]);
+                    printf(" ");
+                    printf("%d ", gr->grupo[aux[i] + 1]);
+                    printf("%d %d %d ", gr->grau_entrada[aux[i] + 1], gr->grau_saida[aux[i] + 1], gr->grau_saida[aux[i] + 1] + gr->grau_entrada[aux[i] + 1]);
                     printTec(li, gr->arestas[aux[i] + 1][j]);
-                    printf(", %0.f", gr->pesos[aux[i] + 1][j]);
+                    printf(" %0.f", gr->pesos[aux[i] + 1][j]);
                     printf("\n");
                 }
                 
@@ -209,7 +199,7 @@ Grafo*  geraGrafo(FILE* bin, Lista* lista){
         printf("Registro Inexistente.\n");
         return;
     }
-    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias, 20);
+    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias + 1, 20);
     while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
         fread(&(registro->grupo), sizeof(int), 1, bin);
         fread(&(registro->popularidade), sizeof(int), 1, bin);

@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_prático_2/13676461",
-      "program": "/home/jean/Área de Trabalho/Data-Structs-III/trabalho_prático_2/13676461/build/Debug/outDebug",
+      "cwd": ".",
+      "program": "build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

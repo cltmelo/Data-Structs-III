@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 all:
 	gcc -o main *.c
 run:
@@ -11,4 +10,3 @@ valgrind:
 	
 clear:
 	rm -f main
-=======

@@ -2,6 +2,17 @@
 #ifndef GRAPHS_H
 #define GRAPHS_H
 
+//Definição do tipo Grafo
+struct grafo{
+    int nro_vertices;
+    int grau_max;
+    int** arestas;
+    float** pesos;
+    int* grau_entrada;
+    int* grau_saida;
+    int *grupo;
+};
+
 typedef struct grafo Grafo;
 
 Grafo* cria_Grafo(int nro_vertices, int grau_max);

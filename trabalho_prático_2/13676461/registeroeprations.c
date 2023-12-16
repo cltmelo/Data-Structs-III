@@ -1,6 +1,21 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #include <stdio.h>
 #include "registeropertions.h"
 
+/**
+ * @brief Abertura de arquivo apenas para leitura
+ * 
+ * @param nomeArquivo 
+ * @return arquivo aberto 
+ */
 FILE *abrirArquivoLeitura(const char *nomeArquivo){
     FILE* arquivo;
 
@@ -8,12 +23,18 @@ FILE *abrirArquivoLeitura(const char *nomeArquivo){
 
     if(arquivo == NULL){
         printf("Falha no processamento do arquivo.\n");
-        return 0;
+        return NULL;
     }
     
     return arquivo; // Ponteiro no começo do arquivo
 }
 
+/**
+ * @brief Abertura de arquivo apenas para escrita
+ * 
+ * @param nomeArquivo 
+ * @return arquivo aberto 
+ */
 FILE *abrirArquivoEscrita(const char *nomeArquivo){
     FILE* arquivo;
 
@@ -21,12 +42,18 @@ FILE *abrirArquivoEscrita(const char *nomeArquivo){
 
     if(arquivo == NULL){
         printf("Falha no processamento do arquivo.\n");
-        return 0;
+        return NULL;
     }
     
     return arquivo; // Ponteiro no começo do arquivo
 }
 
+/**
+ * @brief Remoção de caracteres do tipo LIXO de uma string
+ * 
+ * @param str 
+ * @param tamanho 
+ */
 void removeLixo(char *str, int tamanho) {
     // Encontrar a posição do primeiro caractere de lixo ('$')
     int pos = 0;
@@ -37,12 +64,22 @@ void removeLixo(char *str, int tamanho) {
     str[pos] = '\0';
 }
 
+/**
+ * @brief Função para fechamento de arquivo, verificando se é nulo ou não.
+ * 
+ * @param arquivo 
+ */
 void fecharArquivo(FILE *arquivo){
     if (arquivo != NULL) {
         fclose(arquivo);
     }
 }
 
+/**
+ * @brief Remove as aspas de uma string, modificando a string original para excluir esses caracteres
+ * 
+ * @param str 
+ */
 void removeAspas(char *str) {
     int len = strlen(str);
     int j = 0;
@@ -59,6 +96,12 @@ void removeAspas(char *str) {
     // Adiciona o caractere nulo ao final da nova string
     str[j] = '\0';
 }
+
+/**
+ * @brief Aloca memória para um novo Registro, incializando seus campos
+ * 
+ * @return Registro* 
+ */
 Registro* inicializarRegistro(){
     Registro *r = (Registro*)malloc(sizeof(Registro));
     if (r == NULL) {
@@ -80,6 +123,11 @@ Registro* inicializarRegistro(){
     return r;
 }
 
+/**
+ * @brief Aloca memória para um novo Cabeçalho, incializando seus campos
+ * 
+ * @return Cabecalho* 
+ */
 Cabecalho* inicializarCabecalho(){
     Cabecalho* cabecalho = malloc(sizeof(Cabecalho));
     cabecalho->status = '0'; 
@@ -90,6 +138,7 @@ Cabecalho* inicializarCabecalho(){
     return cabecalho;
 }
 
+/*
 int lerRegistro(FILE *arquivo, Registro *registro){
 
     //leitura do registro
@@ -121,8 +170,14 @@ int lerRegistro(FILE *arquivo, Registro *registro){
 
     return 1; //leitura bem sucedida
 }
+*/
 
-
+/**
+ * @brief Preenche o restante do registro com LIXO após os campos fixos e variáveis já preenchidos.
+ * 
+ * @param arquivo 
+ * @param registro 
+ */
 void preenche_lixo(FILE* arquivo, Registro* registro){
     //variavel auxliar para definir o tamanho do lixo no registro atual
     int aux = (TAM_REGISTRO - (TAM_REGISTRO_FIXO + registro->tecnologiaOrigem.tamanho + registro->tecnologiaDestino.tamanho));
@@ -136,7 +191,14 @@ void preenche_lixo(FILE* arquivo, Registro* registro){
     fwrite(trash, sizeof(char), aux, arquivo);
 }
 
-void escreverRegistro(FILE *arquivo, const Registro *registro){
+/**
+ * @brief Escreve um registro em um binário. Cada campo do registro é escrito no arquivo de acordo com seu tipo e tamanho,
+ *  e o restante do registro é preenchido com LIXO para manter um tamanho fixo.
+ * 
+ * @param arquivo 
+ * @param registro 
+ */
+void escreverRegistro(FILE *arquivo, Registro *registro){
     fwrite(&(registro->removido), sizeof(char), 1, arquivo);
     fwrite(&(registro->grupo), sizeof(int), 1, arquivo);
     fwrite(&(registro->popularidade), sizeof(int), 1, arquivo);
@@ -151,6 +213,13 @@ void escreverRegistro(FILE *arquivo, const Registro *registro){
 }
 
 
+/**
+ * @brief Realiza a leitura do cabeçalho contendo registros.
+ * 
+ * @param arquivo 
+ * @param c 
+ * @return int 
+ */
 int lerCabecalho(FILE* arquivo, Cabecalho* c){
 
     if(fread(&(c->status), sizeof(char), 1, arquivo) == 0)
@@ -163,6 +232,12 @@ int lerCabecalho(FILE* arquivo, Cabecalho* c){
     return 1; //leitura bem sucedida
 }
 
+/**
+ * @brief escrever o cabeçalho contendo registros.
+ * 
+ * @param arquivo 
+ * @param c 
+ */
 void escreverCabecalho(FILE* arquivo, Cabecalho* c){
     fwrite(&(c->status), sizeof(char), 1, arquivo);
     fwrite(&(c->proxRRN), sizeof(int), 1, arquivo);
@@ -170,12 +245,24 @@ void escreverCabecalho(FILE* arquivo, Cabecalho* c){
     fwrite(&(c->nroParesTecnologias), sizeof(int), 1, arquivo);
 }
 
+/**
+ * @brief Atualiza o cabeçalho com base nas informações de um registro atalizado.
+ * 
+ * @param registro 
+ * @param cabecalho 
+ */
 void atualizaCabecalho(Registro* registro, Cabecalho* cabecalho){
     if(registro->tecnologiaDestino.tamanho != 0 && registro->tecnologiaOrigem.tamanho != 0)
         cabecalho->nroParesTecnologias++;
     cabecalho->proxRRN++;
 }
 
+/**
+ * @brief Imprime na saída padrão as informações contidas em um registro, 
+ * de modo que formata a saída de acordo com as especificações do campo e imprime "NULO" se o campo não estiver preenchido.
+ * 
+ * @param registro 
+ */
 void printRegister(Registro *registro){
 
     char* end = ", ";

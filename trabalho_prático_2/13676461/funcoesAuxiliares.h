@@ -1,3 +1,12 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #ifndef FUNCOESAUXILIARES_H
 #define FUNCOESAUXILIARES_H
 
@@ -27,10 +36,11 @@ Lista* cria_lista();
 void libera_lista(Lista* li);
 void insere_lista_final(Lista *li, data *x);
 int tamanho_lista(Lista* li);
-void imprimeLista(Lista* li);
+// void imprimeLista(Lista* li);
 int busca_sequencial(Lista *li, data *chave);
 void printTec(Lista *li, int indice);
 int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho);
+
 
 
 int byte_offset(int RRN); //retorna o byte offset de um registros

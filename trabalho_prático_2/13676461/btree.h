@@ -1,6 +1,17 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #ifndef BTREE_H
 #define BTREE_H
 
+
+#define TAM_REGISTRO_B 205
 
 /* O tamanho do registro de cabeçalho deve ser de 205 bytes */
 typedef struct {
@@ -31,6 +42,8 @@ void removerChave(int chave);
 void read_node(FILE* indice, Node *no, int RRN);
 void printNode(Node no);
 btree_header LerHeader(FILE* indice);
+// btree_header InserirNo(FILE *indice, char* newKey, int PR);
 Node InserirNo(FILE *indice, char* newKey, int PR, Node no, int RRN_pai, btree_header *bHeader);
 Node criaNode();
+
 #endif

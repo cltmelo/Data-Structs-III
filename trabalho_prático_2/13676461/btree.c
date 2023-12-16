@@ -1,3 +1,12 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,10 +14,20 @@
 #include "registeropertions.h"
 #include "funcoesAuxiliares.h"
 
+/**
+ * @brief Calcula o byte offset para um registro da nossa arvore, dado um RRN 
+ * 
+ * @param rrn
+ */
 int byteoffset_bHeader(int rrn){
-    return rrn*205+205;
+    return rrn*TAM_REGISTRO_B+TAM_REGISTRO_B;
 }
 
+/**
+ * @brief "Cria" nosssa arvore B, incializando o cabeçalho do nó com as devidas especificações
+ * 
+ * @return btree_header 
+ */
 btree_header criarArvoreB(){
     btree_header bHeader;
     bHeader.noRaiz = -1;
@@ -24,13 +43,19 @@ Node criaNode(){
     no.RRNdoNO = 0;
     for (int i = 0; i < 3; i++) {
         no.P[i] = -1;
-        no.C[i][0] = '\0';
+        no.C[i][0] = NULL_TERM;
         no.PR[i] = -1;
     }
     no.P[3] = -1;
     return no;
 }
-// Funcao para escrever cabecalho no arquivo de indices
+
+/**
+ * @brief Funcao para escrever cabecalho no arquivo de indices
+ * 
+ * @param indice 
+ * @param bHeader 
+ */
 void escreve_btree_header(FILE *indice, btree_header *bHeader){
     fseek(indice, 0, SEEK_SET);
     fwrite(&(bHeader->status), sizeof(char), 1, indice);
@@ -49,7 +74,12 @@ void escreve_btree_header(FILE *indice, btree_header *bHeader){
 }
 
 
-// Funcao para escrever nó no arquivo de indices
+/**
+ * @brief Funcao para escrever nó no arquivo de indices
+ * 
+ * @param indice 
+ * @param no 
+ */
 void escreve_node(FILE *indice, Node *no){
     fseek(indice, byteoffset_bHeader(no->RRNdoNO), SEEK_SET);
     fwrite(&(no->nroChavesNo), sizeof(int), 1, indice);
@@ -74,7 +104,11 @@ void escreve_node(FILE *indice, Node *no){
 }
 
 
-// Funcao para escrever nó no arquivo de indices
+/**
+ * @brief Funcao para imprimir nó da arvore
+ * 
+ * @param no 
+ */
 void printNode(Node no){
     printf("%d, ", no.nroChavesNo);
     printf("%d, ", no.alturaNo);
@@ -89,6 +123,12 @@ void printNode(Node no){
     printf("%d, ", no.P[3]);
 }
 
+/**
+ * @brief Leitura do cabeçalho (arvore B)
+ * 
+ * @param indice 
+ * @return btree_header 
+ */
 btree_header LerHeader(FILE* indice){
     btree_header bHeader;
     fseek(indice, 0, SEEK_SET);
@@ -98,7 +138,13 @@ btree_header LerHeader(FILE* indice){
     return bHeader;
 }
 
-
+/**
+ * @brief Implemente a função de leitura do nó do disco. Além de evitar a leitura de lixo.
+ * 
+ * @param indice 
+ * @param no 
+ * @param RRN 
+ */
 void read_node(FILE* indice, Node *no, int RRN){
     long pos = byteoffset_bHeader(RRN);
     fseek(indice, pos, SEEK_SET);
@@ -123,6 +169,14 @@ void read_node(FILE* indice, Node *no, int RRN){
     
 }
 
+/**
+ * @brief Busca binária recursiva para encontrar no, dada uma chave
+ * 
+ * @param indice 
+ * @param chave 
+ * @param RRN 
+ * @return campo de referência para o registro no arquivo de dados, caso a chave esteja na arvore ou -1, caso não esteja.
+ */
 int Busca(FILE* indice, char *chave, int RRN) {
     Node no;
     read_node(indice, &no, RRN);
@@ -142,6 +196,14 @@ int Busca(FILE* indice, char *chave, int RRN) {
 }
 
 
+/**
+ * @brief Busca (recursiva) de um no do tipo folha, dada uma chave
+ * 
+ * @param indice 
+ * @param RRN 
+ * @param chave 
+ * @return Node 
+ */
 Node BuscaNoFolha(FILE* indice, Node no, char* chave){
     int i = 0;
 
@@ -154,7 +216,16 @@ Node BuscaNoFolha(FILE* indice, Node no, char* chave){
     return aux;
 }
 
-
+/**
+ * @brief Realiza a inserção da nova chave no nó. Utiliza um loop para busca da posição correta: se estiver vazio, insere, 
+ * se não, verifica se deve ser inserido antes ou depois de chave já existente. Após a inserção, atualiza a quantidade de chaves no no.
+ * 
+ * @param no 
+ * @param newKey 
+ * @param PR 
+ * @param P 
+ * @return posicao onde a chave deve ser inserida
+ */
 int insereNoIndice(Node *no, char* newKey, int PR, int P){
     int pos = 0;
 
@@ -190,9 +261,24 @@ int insereNoIndice(Node *no, char* newKey, int PR, int P){
 
 }
 
-// Node no - No que vai ser splitado; Char* newKey - Chave que vai entrar no nó
+/**
+ * @brief Split 2-1 que divide um nó durante a inserção. Quando o no está cheio, ocorre o split e as chaves são redistribuidas (balanceada).
+ * Identifica a posição correta para inserir a nova chave no nó, mantendo a ordem das chaves.
+ * Preenche arrays temporários com as chaves, valores de PR e ponteiros do nó. Em seguida ordena o vetor temporário.
+ * Cria um novo nó auxiliar com as duas últimas posições do vetor temporário e
+ * atualiza o nó original, removendo os valores que foram movidos para o auxiliar.
+ * Cria um novo nó (split) representando a chave a ser promovida para o nível superior da árvore.
+ * POr fim, escreve os nós no e auxiliar no arquivo de índices.
+ * 
+ * @param indice 
+ * @param bHeader 
+ * @param no - no que será splitado
+ * @param newKey - nova chave a ser inserida 
+ * @param PR 
+ * @param P 
+ * @return Node split - chave, RRN e ponteiro do nó a direita
+ */
 Node split(FILE* indice, btree_header *bHeader, Node* no, char* newKey, int PR, int P) {
-    // Verifica se ta no nó raiz, se estiver, splita e cria outro nó
 
     // Com o nó pai, ordenar o no a ser splitado e alocar a chave na posição [1] no pai
     Node auxiliar = criaNode();
@@ -246,7 +332,7 @@ Node split(FILE* indice, btree_header *bHeader, Node* no, char* newKey, int PR, 
     for (int i = 0; i < 3; i++) {
         no->P[i] = -1;
         no->P[i + 1] = -1;
-        no->C[i][0] = '\0';
+        no->C[i][0] = NULL_TERM;
         no->PR[i] = -1;
     }
 
@@ -274,6 +360,26 @@ Node split(FILE* indice, btree_header *bHeader, Node* no, char* newKey, int PR, 
     return split;
 }
 
+/**
+ * @brief Inserção de uma nova chave em um nó. Se necessário, realiza a divisão do nó e propaga a promoção de uma
+ * chave para o nível superior, garantindo que a estrutura da árvore seja mantida.
+ * Casos possíveis:
+ * a) Se a árvore está vazia, cria um novo nó, insere a chave e o escreve no arquivo.
+ * b) Se o nó não é uma folha, realiza uma chamada recursiva para encontrar a folha onde a chave deve ser inserida.
+ * Caso a folha onde a inserção ocorreu cresceu, atualiza a chave e os ponteiros necessários.
+ * Verifica se o nó está cheio após a inserção. Se não estiver, simplesmente insere a chave.
+ * Se o nó estiver cheio, realiza a divisão do nó e propaga a promoção.
+ * Se o nó dividido é a raiz, cria uma nova raiz e atualiza o cabeçalho da árvore.
+ * Se não for a raiz, retorna o nó dividido com um marcador de promoção.
+ * 
+ * @param indice 
+ * @param newKey 
+ * @param PR 
+ * @param no 
+ * @param RRN_pai 
+ * @param bHeader 
+ * @return Node 
+ */
 Node InserirNo(FILE *indice, char* newKey, int PR, Node no, int RRN_pai, btree_header *bHeader){
     // 1. Procurar a folha onde a chave deve ser inserida
      

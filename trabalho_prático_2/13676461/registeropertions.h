@@ -1,3 +1,12 @@
+/*
+* Name: Lucas Corlete Alves de Melo - NUSP: 13676461; Jean Carlos Pereira Cassiano - NUSP: 138640008
+* Course: SCC0607 - Estrutura de Dados III
+* Professor: Cristina Dutra de Aguiar
+* Project: Trabalho Introdutório, 1 e 2 de ED3
+* Description: Este trabalho tem como objetivo armazenar dados em um arquivo binário bem como desenvolver funcionalidades para a 
+* manipulação desses dados. Novas funcionalidades serão adicionadas conforme o avançar da disciplina.
+*/
+
 #ifndef REGISTEROPERATIONS_H_INCLUDED
 #define REGISTEROPERATIONS_H_INCLUDED
 
@@ -64,10 +73,10 @@ FILE *abrirArquivoEscrita(const char *nomeArquivo);
 void fecharArquivo(FILE *arquivo);
 
 // Função para ler um registro do arquivo binário
-int lerRegistro(FILE *arquivo, Registro *registro);
+// int lerRegistro(FILE *arquivo, Registro *registro);
 
 // Função para escrever um registro no arquivo binário
-void escreverRegistro(FILE *arquivo, const Registro *registro);
+void escreverRegistro(FILE *arquivo, Registro *registro);
 
 // Função para preencher os campos vaios do registro atual comm 'LIXO'
 void preenche_lixo(FILE* arquivo, Registro* registro);

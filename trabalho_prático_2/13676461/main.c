@@ -29,9 +29,9 @@ int main(){
     case 2:
         LerBIN();
         break;
-    case 3:
-        selectWhere();
-        break;
+    // case 3:
+    //     selectWhere();
+    //     break;
     case 4:
         buscarRRN();
         break;
