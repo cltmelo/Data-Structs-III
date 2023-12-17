@@ -119,7 +119,7 @@ int tamanho_lista(Lista* li){
 
 void imprimeLista(Lista* li){
     if (li == NULL ){
-        return 0;
+        return;
     }
     Elem *no = *li;
     while(1){
@@ -264,7 +264,7 @@ Registro* separaString(const char* Linha){
 int compararStrings(const void* a, const void* b) {
     return strcmp(*(const char**)a, *(const char**)b);
 }
-int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho) {
+int* indicesEmOrdemAlfabetica(Lista* li, int tamanho) {
     // Conta o número de elementos na lista
     int numElementos = 0;
     Elem* aux = *li;
