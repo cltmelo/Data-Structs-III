@@ -775,4 +775,54 @@ void FortementeConexo(){
 }
 
 //funcionalidade12
-void BuscaCaminho(){}
+void BuscaCaminho(){
+    char arq_bin[GLOBAL];
+    scanf("%s", arq_bin);
+    // Leitura do arquivo binário e criação do Grafo
+    // FILE* bin = abrirArquivoLeitura(arq_bin);
+    FILE* bin;
+    bin = fopen(arq_bin, "rb");
+    if(bin == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    // Leitura da entrada
+    int n;
+    scanf("%d", &n);
+    
+    Cabecalho* cabecalho = inicializarCabecalho();
+    Lista* lista = inicializarListaTecnologias(bin, n);  // Certifique-se de ter uma função para inicializar sua lista
+    Grafo* gr = criaGrafoComTecnologias(cabecalho->nroTecnologias, 20, lista);
+
+
+    if (gr == NULL) {
+        printf("Erro ao criar o grafo.\n");
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        char origem[MAX_NOME_TECNOLOGIA], destino[MAX_NOME_TECNOLOGIA];
+        scanf("%s %s", origem, destino);
+        printf("Origem: %s, Destino: %s\n", origem, destino); //DEPURACAO
+
+        int idOrigem = busca_sequencial(lista, origem);
+        int idDestino = busca_sequencial(lista, destino);
+
+        if (idOrigem != -1 && idDestino != -1) {
+            // Executa o algoritmo de Dijkstra
+            dijkstra(gr, idOrigem, idDestino);
+        } else {
+            printf("%s %s: CAMINHO INEXISTENTE\n", origem, destino);
+        }
+    }
+
+    // Libera a memória alocada
+    libera_lista(lista);
+    libera_Grafo(gr);
+    free(cabecalho);
+
+    fclose(bin);
+
+    return;
+}

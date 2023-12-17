@@ -11,6 +11,7 @@ struct grafo{
     int* grau_entrada;
     int* grau_saida;
     int *grupo;
+    char** tecnologias;  // Adicionado para armazenar nomes das tecnologias (funcionalidade 12)
 };
 
 typedef struct grafo Grafo;
@@ -36,5 +37,28 @@ Grafo* transporGrafo(Grafo* gr);
 void dfsComponentes(Grafo* gr, int vert, int* visitado, int componente);
 
 void componentesFortementeConexos(Grafo* gr);
+
+
+//=====================================================================================================================
+// TENATIVA DA FUNCIONALIDADE 12
+
+#include <limits.h>
+
+#define INFINITO INT_MAX
+#define MAX_NOME_TECNOLOGIA 100
+
+// Definição do tipo Grafo (atualizado)
+
+// Função para obter o peso da aresta entre dois vértices
+float obterPesoAresta(Grafo* gr, int origem, int destino);
+
+// Função para obter o nome da tecnologia associada a um vértice
+char* obterTecnologia(Grafo* gr, int vertice);
+
+// Função para inicializar o Grafo com nomes das tecnologias
+Grafo* criaGrafoComTecnologias(int nro_vertices, int grau_max, Lista* lista_tecnologias);
+
+// Função para executar o algoritmo de Dijkstra
+void dijkstra(Grafo* gr, int origem, int destino);
 
 #endif

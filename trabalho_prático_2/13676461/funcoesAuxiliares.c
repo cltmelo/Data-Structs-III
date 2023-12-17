@@ -359,3 +359,81 @@ void printTec(Lista *li, int indice) {
     }
 
 }
+
+//==============================================================================================================
+// Funções auxiliares para a lista por causa da funcionalidade 12
+
+/**
+ * @brief Recupera o elemento na posição específica da lista
+ * 
+ * @param li Ponteiro para a lista
+ * @param pos Posição desejada
+ * @return data* Ponteiro para o elemento na posição especificada
+ */
+data* recupera_lista_pos(Lista* li, int pos) {
+    if (li == NULL || pos <= 0) {
+        // Retorna NULL indicando que a lista é inválida ou a posição é inválida
+        return NULL;
+    }
+
+    Elem* aux = *li;
+    int currentPos = 1;
+
+    // Percorre a lista sequencialmente
+    while (aux != NULL) {
+        // Verifica se a posição é a desejada
+        if (currentPos == pos) {
+            // Retorna o ponteiro para o valor correspondente à posição
+            return aux->valor;
+        }
+
+        // Avança para o próximo elemento na lista
+        aux = aux->prox;
+        currentPos++;
+    }
+
+    // Retorna NULL indicando que a posição não foi encontrada
+    return NULL;
+}
+/*
+int busca_sequencial_2(Lista *li, data *chave) {
+    if (li == NULL || chave == NULL) {
+        // Retorna um valor indicando que a chave não foi encontrada
+        return -1;
+    }
+
+    int count = 0;
+    Elem *no = *li;
+
+    while (no != NULL) {
+        count++;
+        if (strcmp(no->valor->nome, chave->nome) == 0) {
+            // Retorna a posição da chave se encontrada
+            return count;
+        }
+        no = no->prox;
+    }
+
+    // Retorna -1 indicando que a chave não foi encontrada
+    return -1;
+}
+*/
+
+// Função para inicializar a lista de tecnologias a partir de um arquivo binário
+Lista* inicializarListaTecnologias(FILE* arquivo, int n) {
+    Lista* lista = cria_lista();
+
+    for (int i = 0; i < n; i++) {
+        char tecnologiaOrigem[256];
+        char tecnologiaDestino[256];
+
+        // Leia os nomes das tecnologias de origem e destino do arquivo
+        fscanf(arquivo, "%s %s", tecnologiaOrigem, tecnologiaDestino);
+
+        // Insira os nomes na lista
+        insere_lista_final(lista, tecnologiaOrigem);
+        insere_lista_final(lista, tecnologiaDestino);
+    }
+
+    return lista;
+}

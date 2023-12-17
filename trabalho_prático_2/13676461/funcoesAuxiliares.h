@@ -48,4 +48,10 @@ int byte_offset(int RRN); //retorna o byte offset de um registros
 Registro* separaString(const char* Linha); // Função qeu converte uma linha de texto em um formato para Registro
 
 
+
+
+data* recupera_lista_pos(Lista* li, int pos);
+Lista* inicializarListaTecnologias(FILE* arquivo, int n);
+
+
 #endif /* FUNCOESAUXILIARES_H */

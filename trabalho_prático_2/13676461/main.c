@@ -56,6 +56,9 @@ int main(){
     case 11:
         FortementeConexo();
         break;
+    case 12:
+        BuscaCaminho();
+        break;
     default:
         printf("Comando inexistente.\n");
     }

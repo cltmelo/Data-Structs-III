@@ -359,3 +359,97 @@ void componentesFortementeConexos(Grafo* gr) {
 
 //=====================================================================================================================
 // TENATIVA DA FUNCIONALIDADE 12
+
+// Função para obter o peso da aresta entre dois vértices
+float obterPesoAresta(Grafo* gr, int origem, int destino) {
+    return gr->pesos[origem][destino];
+}
+
+// Função para obter o nome da tecnologia associada a um vértice
+char* obterTecnologia(Grafo* gr, int vertice) {
+    return gr->tecnologias[vertice];
+}
+
+// Função para inicializar o Grafo com nomes das tecnologias
+Grafo* criaGrafoComTecnologias(int nro_vertices, int grau_max, Lista* lista_tecnologias) {
+    Grafo *gr;
+    gr = (Grafo*) malloc(sizeof(struct grafo));
+    if(gr != NULL){
+        int i;
+        gr->nro_vertices = nro_vertices;
+        gr->grau_max = grau_max;
+        gr->grau_entrada = (int*) calloc(nro_vertices, sizeof(int));
+        gr->grau_saida = (int*) calloc(nro_vertices, sizeof(int));
+        gr->grupo = (int*) calloc(nro_vertices, sizeof(int));
+        gr->arestas = (int**) malloc(nro_vertices * sizeof(int*));
+        for(i = 0; i < nro_vertices; i++)
+            gr->arestas[i] = (int*) malloc(grau_max * sizeof(int));
+
+        gr->pesos = (float**) malloc(nro_vertices * sizeof(float*));
+        for(i = 0; i < nro_vertices; i++)
+            gr->pesos[i] = (float*) malloc(grau_max * sizeof(float));
+
+        gr->tecnologias = (char**) malloc(nro_vertices * sizeof(char*));
+        for(i = 0; i < nro_vertices; i++) {
+            gr->tecnologias[i] = (char*) malloc(MAX_NOME_TECNOLOGIA * sizeof(char));
+            strcpy(gr->tecnologias[i], recupera_lista_pos(lista_tecnologias, i));
+            // strcpy(gr->tecnologias[i], recupera_lista_pos(lista_tecnologias, i + 1));  // Assumindo que a lista de tecnologias começa na posição 1
+        }
+    }
+    return gr;
+}
+
+
+void dijkstra(Grafo* gr, int origem, int destino) {
+    printf("\nOrigem: %d, Destino: %d\n", origem, destino); //DEPURACAO
+    
+    int numVertices = gr->nro_vertices;
+
+    int* visitado = (int*)malloc(numVertices * sizeof(int));
+    int* antecessor = (int*)malloc(numVertices * sizeof(int));
+    float* distancia = (float*)malloc(numVertices * sizeof(float));
+
+    // Inicialização
+    for (int i = 0; i < numVertices; i++) {
+        visitado[i] = 0;
+        antecessor[i] = -1;
+        distancia[i] = INFINITO;
+    }
+
+    // A distância da origem para ela mesma é sempre 0
+    distancia[origem] = 0;
+
+    for (int count = 0; count < numVertices - 1; count++) {
+        // Escolhe o vértice de menor distância ainda não visitado
+        int u = -1;
+        for (int v = 0; v < numVertices; v++) {
+            if (!visitado[v] && (u == -1 || distancia[v] < distancia[u])) {
+                u = v;
+            }
+        }
+
+        // Marca o vértice escolhido como visitado
+        visitado[u] = 1;
+
+        // Atualiza as distâncias dos vértices adjacentes ao vértice escolhido
+        for (int v = 0; v < numVertices; v++) {
+            float peso = obterPesoAresta(gr, u, v);  // Substitua pela função apropriada
+            if (!visitado[v] && peso > 0 && distancia[u] != INFINITO && (distancia[u] + peso) < distancia[v]) {
+                distancia[v] = distancia[u] + peso;
+                antecessor[v] = u;
+            }
+        }
+    }
+
+    // Imprime o caminho mais curto e o peso
+    if (distancia[destino] != INFINITO) {
+        printf("\"%s\" \"%s\": %.2f\n", obterTecnologia(gr, origem), obterTecnologia(gr, destino), distancia[destino]);
+    } else {
+        printf("\"%s\" \"%s\": CAMINHO INEXISTENTE\n", obterTecnologia(gr, origem), obterTecnologia(gr, destino));
+    }
+
+    // Libera a memória alocada
+    free(visitado);
+    free(antecessor);
+    free(distancia);
+}
