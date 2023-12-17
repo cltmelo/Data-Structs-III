@@ -89,7 +89,7 @@ Grafo*  geraTransposto(Grafo* gr){
     int i, j;
     for(i=0; i < gr->nro_vertices; i++){
         for(j=0; j < gr->grau_saida[i]; j++){
-            insereAresta(trans, gr->arestas[i][j], i, gr->pesos[i][j], gr->grupo[i]);
+            insereAresta(trans, gr->arestas[i][j], i, gr->pesos[i][j], gr->grupo[gr->arestas[i][j]]);
         }
     }
     return trans;
@@ -107,7 +107,7 @@ void imprime_GrafoT(Grafo *gr, Lista *li){
             for(j=0; j < trans->grau_saida[aux[i] + 1]; j++){
                 if ((aux[k] + 1) == trans->arestas[aux[i] + 1][j]){
                     printTec(li, aux[i] + 1);
-                    printf(" %d ", gr->grupo[aux[i] + 1]);
+                    printf(" %d ", trans->grupo[aux[i] + 1]);
                     printf("%d %d %d ", trans->grau_entrada[aux[i] + 1], trans->grau_saida[aux[i] + 1], trans->grau_saida[aux[i] + 1] + trans->grau_entrada[aux[i] + 1]);
                     printTec(li, trans->arestas[aux[i] + 1][j]);
                     printf(" %0.f", trans->pesos[aux[i] + 1][j]);
