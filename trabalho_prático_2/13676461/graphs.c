@@ -3,6 +3,15 @@
 #include "graphs.h"
 #include "funcoesAuxiliares.h"
 
+/**
+ * @brief Cria um grafo com o número especificado de vértices e grau máximo.
+ * 
+ * Esta função aloca dinamicamente a estrutura de grafo e seus elementos internos com base no número de vértices e grau máximo especificados.
+ * 
+ * @param nro_vertices Número de vértices do grafo.
+ * @param grau_max Grau máximo do grafo.
+ * @return Grafo* gr, ponteiro para struct Grafo criado.
+ */
 Grafo* cria_Grafo(int nro_vertices, int grau_max){
     Grafo *gr;
     gr = (Grafo*) malloc(sizeof(struct grafo));
@@ -26,6 +35,11 @@ Grafo* cria_Grafo(int nro_vertices, int grau_max){
     return gr;
 }
 
+/**
+ * @brief Libera a memória alocada para a estrutura de grafo.
+ * 
+ * @param gr Ponteiro para o struct Grafo a ser liberado.
+ */
 void libera_Grafo(Grafo* gr){
     if(gr != NULL){
         int i;
@@ -43,6 +57,16 @@ void libera_Grafo(Grafo* gr){
     }
 }
 
+/**
+ * @brief Insere uma aresta no grafo, especificando os vértices de origem e destino, o peso da aresta e o grupo ao qual pertence.
+ * 
+ * @param gr
+ * @param orig Vértice de origem.
+ * @param dest Vértice de destino.
+ * @param peso Peso da aresta.
+ * @param grupo Grupo ao qual a aresta pertence.
+ * @return 1 se a inserção for bem-sucedida, 0 caso contrário.
+ */
 int insereAresta(Grafo* gr, int orig, int dest, float peso, int grupo){
     if(gr == NULL)
         return 0;
@@ -59,13 +83,21 @@ int insereAresta(Grafo* gr, int orig, int dest, float peso, int grupo){
     return 1;
 }
 
+/**
+ * @brief Imprime o grafo, considerando a ordem alfabética das tecnologias.
+ * 
+ * As informações impressas incluem o vértice de origem, o grupo, os graus de entrada e saída, o vértice de destino, o peso da aresta.
+ * 
+ * @param gr
+ * @param li Lista de tecnologias.
+ */
 void imprime_Grafo(Grafo *gr, Lista *li){
     if(gr == NULL)
         return;
     int i, j;
     int* aux = indicesEmOrdemAlfabetica(li, tamanho_lista(li));
 
-    for(i=0; i < gr->nro_vertices; i++){
+    for(i=0; i < gr->nro_vertices - 1; i++){
         for (int k = 0; k < tamanho_lista(li); k++){
             for(j=0; j < gr->grau_saida[aux[i] + 1]; j++){
                 if ((aux[k] + 1) == gr->arestas[aux[i] + 1][j]){
@@ -84,23 +116,46 @@ void imprime_Grafo(Grafo *gr, Lista *li){
     }
 }
 
+/**
+ * @brief Gera o grafo transposto, com base no grafo de entrada.
+ * 
+ * @param gr
+ * @return Grafo* ponteiro para o grafo transposto.
+ */
+Grafo*  geraTransposto(Grafo* gr){
+    Grafo* trans = cria_Grafo(gr->nro_vertices, 20);
+    int i, j;
+    for(i=0; i < gr->nro_vertices; i++){
+        for(j=0; j < gr->grau_saida[i]; j++){
+            insereAresta(trans, gr->arestas[i][j], i, gr->pesos[i][j], gr->grupo[i]);
+        }
+    }
+    return trans;
 
+}
+
+/**
+ * @brief Imprime o grafo transposto, considerando a ordem alfabética das tecnologias.
+ 
+ * @param gr
+ * @param li Lista de tecnologias.
+ */
 void imprime_GrafoT(Grafo *gr, Lista *li){
     if(gr == NULL)
         return;
     int i, j;
     int* aux = indicesEmOrdemAlfabetica(li, tamanho_lista(li));
-
-    for(i=0; i < gr->nro_vertices; i++){
+    Grafo *trans;
+    trans = geraTransposto(gr);
+    for(i=0; i < trans->nro_vertices - 1; i++){
         for (int k = 0; k < tamanho_lista(li); k++){
-            for(j=0; j < gr->grau_saida[aux[i] + 1]; j++){
-                if ((aux[k] + 1) == gr->arestas[aux[i] + 1][j]){
+            for(j=0; j < trans->grau_saida[aux[i] + 1]; j++){
+                if ((aux[k] + 1) == trans->arestas[aux[i] + 1][j]){
                     printTec(li, aux[i] + 1);
-                    printf(", ");
-                    printf("%d, ", gr->grupo[aux[i] + 1]);
-                    printf("%d, %d, %d, ", gr->grau_entrada[aux[i] + 1], gr->grau_saida[aux[i] + 1], gr->grau_saida[aux[i] + 1] + gr->grau_entrada[aux[i] + 1]);
-                    printTec(li, gr->arestas[aux[i] + 1][j]);
-                    printf(", %0.f", gr->pesos[aux[i] + 1][j]);
+                    printf(" %d ", gr->grupo[aux[i] + 1]);
+                    printf("%d %d %d ", trans->grau_entrada[aux[i] + 1], trans->grau_saida[aux[i] + 1], trans->grau_saida[aux[i] + 1] + trans->grau_entrada[aux[i] + 1]);
+                    printTec(li, trans->arestas[aux[i] + 1][j]);
+                    printf(" %0.f", trans->pesos[aux[i] + 1][j]);
                     printf("\n");
                 }
                 
@@ -111,6 +166,14 @@ void imprime_GrafoT(Grafo *gr, Lista *li){
 }
 
 
+
+/**
+ * @brief Imprime as tecnologias alcançáveis a partir de uma tecnologia específica no grafo transposto.
+ * 
+ * @param gr Ponteiro para o grafo original.
+ * @param li Lista de tecnologias.
+ * @param tec Nome da tecnologia de origem.
+ */
 void imprimirTecGerada(Grafo *gr, Lista *li, char* tec){
     if(gr == NULL)
         return;
@@ -118,18 +181,21 @@ void imprimirTecGerada(Grafo *gr, Lista *li, char* tec){
     int aux = busca_sequencial(li, tec);
     int *tecnologias;
     printf("%s: ", tec);
-    tecnologias = (int*) malloc (sizeof(int) * gr->grau_saida[aux]);
-    for(j=0; j < gr->grau_saida[aux]; j++){
-        tecnologias[j] = gr->arestas[aux][j];
+    Grafo *trans = geraTransposto(gr);
+    tecnologias = (int*) malloc (sizeof(int) * (trans->grau_saida[aux]));
+    for(j=0; j < trans->grau_saida[aux]; j++){
+        tecnologias[j] = trans->arestas[aux][j];
     }
+    i = 0;
+
     int contador = 0;
     int* tecs = indicesEmOrdemAlfabetica(li, tamanho_lista(li));
     for (i = 0; i < tamanho_lista(li); i++){
-        for (j = 0; j < gr->grau_saida[aux]; j++){
+        for (j = 0; j < trans->grau_saida[aux]; j++){
             if (tecs[i] + 1 == tecnologias[j]){
                 printTec(li, tecnologias[j]);
                 contador++;
-                if (contador < gr->grau_saida[aux]){
+                if (contador < trans->grau_saida[aux]){
                     printf(", ");
                 } else {
                     printf("\n\n");
@@ -139,6 +205,14 @@ void imprimirTecGerada(Grafo *gr, Lista *li, char* tec){
     }    
 }
 
+/**
+ * @brief Procura o vértice não visitado com a menor distância no vetor dist.
+ * 
+ * @param dist Vetor de distâncias.
+ * @param visitado Vetor de vértices visitados.
+ * @param NV Número de vértices.
+ * @return int menor, indice do vértice não visitado com a menor distância. Retorna -1 se não encontrar.
+ */
 int procuraMenorDistancia(float *dist, int *visitado, int NV){
     int i, menor = -1, primeiro = 1;
     for(i=0; i < NV; i++){
@@ -155,6 +229,14 @@ int procuraMenorDistancia(float *dist, int *visitado, int NV){
     return menor;
 }
 
+/**
+ * @brief Encontra o menor caminho em um grafo a partir de um vértice inicial.
+ * 
+ * @param gr Grafo.
+ * @param ini Vértice inicial.
+ * @param ant Vetor de predecessores no menor caminho.
+ * @param dist Vetor de distâncias acumuladas.
+ */
 void menorCaminho_Grafo(Grafo *gr, int ini, int *ant, float *dist){
     int i, cont, NV, ind, *visitado, vert;
     cont = NV = gr->nro_vertices;
@@ -191,6 +273,13 @@ void menorCaminho_Grafo(Grafo *gr, int ini, int *ant, float *dist){
 }
 
 
+/**
+ * @brief Gera um grafo a partir do binário e uma lista de tecnologias.
+ * 
+ * @param bin binário.
+ * @param lista Lista de tecnologias.
+ * @return Grafo* gr, ponteiro para o grafo gerado.
+ */
 Grafo*  geraGrafo(FILE* bin, Lista* lista){
     Registro* registro = inicializarRegistro();
     Cabecalho* cabecalho = inicializarCabecalho();
@@ -199,7 +288,7 @@ Grafo*  geraGrafo(FILE* bin, Lista* lista){
         printf("Registro Inexistente.\n");
         return NULL;
     }
-    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias, 20);
+    Grafo* gr = cria_Grafo(cabecalho->nroTecnologias + 1, 20);
     while (fread(&(registro->removido), sizeof(char), 1, bin) == 1) {
         fread(&(registro->grupo), sizeof(int), 1, bin);
         fread(&(registro->popularidade), sizeof(int), 1, bin);
@@ -355,6 +444,27 @@ void componentesFortementeConexos(Grafo* gr) {
     free(pilha);
     libera_Grafo(gr_transposto);
 }
+
+
+
+
+
+
+// int dfsOrdemTermino(Grafo* gr, int vert, int* visitado, int* pilha, int* tempo) {
+//     visitado[vert] = 1;
+
+//     for (int i = 0; i < gr->grau_saida[vert]; i++) {
+//         int ind = gr->arestas[vert][i];
+//         if (!visitado[ind]) {
+//             *tempo += 1;
+//             dfsOrdemTermino(gr, ind, visitado, pilha, tempo);
+//         }
+//     }
+
+//     pilha[*tempo] = vert;
+//     *tempo += 1;
+//     return 1;
+// }
 
 
 //=====================================================================================================================

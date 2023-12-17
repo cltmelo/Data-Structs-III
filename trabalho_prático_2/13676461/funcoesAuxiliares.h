@@ -39,7 +39,7 @@ int tamanho_lista(Lista* li);
 // void imprimeLista(Lista* li);
 int busca_sequencial(Lista *li, data *chave);
 void printTec(Lista *li, int indice);
-int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho);
+int* indicesEmOrdemAlfabetica(Lista* li, int tamanho);
 
 
 

@@ -116,17 +116,20 @@ int tamanho_lista(Lista* li){
     return count;
 }
 
-/*
+
 void imprimeLista(Lista* li){
     if (li == NULL ){
-        return 0;
+        return;
     }
     Elem *no = *li;
-    while(no != NULL){
+    while(1){
         printf("\"%s\"\n", no->valor);
+        if (no->prox == NULL){
+            break;
+        }
         no = no->prox;
     }
-}*/
+}
 
 /*
 -------------------------------------------------------------------------------------
@@ -258,10 +261,27 @@ Registro* separaString(const char* Linha){
 -------------------------------------------------------------------------------------
 */
 
+/**
+ * @brief Função de comparação para qsort, comparando strings.
+ * 
+ * @param a Ponteiro para o primeiro elemento a ser comparado.
+ * @param b Ponteiro para o segundo elemento a ser comparado.
+ * @return int Valor de comparação entre as strings.
+ */
 int compararStrings(const void* a, const void* b) {
     return strcmp(*(const char**)a, *(const char**)b);
 }
-int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho) {
+
+/**
+ * @brief Obtém os índices das strings em ordem alfabética.
+ * 
+ * Esta função recebe uma lista de strings e retorna um vetor de int representando os índices das strings na lista original, em ordem alafabetica.
+ * 
+ * @param li Lista encadeada de strings.
+ * @param tamanho Tamanho da lista.
+ * @return int* Array de inteiros representando os índices ordenados.
+ */
+int* indicesEmOrdemAlfabetica(Lista* li, int tamanho) {
     // Conta o número de elementos na lista
     int numElementos = 0;
     Elem* aux = *li;
@@ -306,6 +326,7 @@ int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho) {
         for (int j = 0; j < numElementos; j++){
             if (strcmp(arrayStrings2[i], arrayStrings[j]) == 0){
                 arrayIndices[i] = j;
+
             }
         }
     }
@@ -315,6 +336,15 @@ int* indicesEmOrdemAlfabetica(Lista* li, int* tamanho) {
     return arrayIndices;
 }
 
+/**
+ * @brief Realiza uma busca sequencial em uma lista encadeada de strings.
+ * 
+ * Esta função percorre a lista sequencialmente buscando por uma chave específica e retorna o índice da chave, caso seja encontrada.
+ * 
+ * @param li Lista encadeada de strings.
+ * @param chave Chave a ser buscada na lista.
+ * @return int count, indice da chave se encontrada; -1 se a chave não for encontrada.
+ */
 int busca_sequencial(Lista *li, data *chave) {
     if (li == NULL || chave == NULL) {
         // Retorna um valor indicando que a chave não foi encontrada
@@ -335,6 +365,14 @@ int busca_sequencial(Lista *li, data *chave) {
     return -1;
 }
 
+/**
+ * @brief Imprime a tecnologia em uma posição específica na lista.
+ * 
+ * Esta função imprime a tecnologia presente em uma posição específica na lista de strings.
+ * 
+ * @param li Lista.
+ * @param indice Índice da posição da tecnologia a ser impressa.
+ */
 void printTec(Lista *li, int indice) {
     if (li == NULL || indice < 0) {
         // Retorna NULL indicando que a lista é inválida ou o índice é inválido

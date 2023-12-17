@@ -1,0 +1,26 @@
+[33m8106e71[m[33m ([m[1;36mHEAD -> [m[1;32mcorlete[m[33m)[m HEAD@{0}: commit (merge): tentativa 12
+[33mf9a4130[m HEAD@{1}: commit: tentativa 12
+[33m017bb31[m HEAD@{2}: commit: rascunho 11
+[33md6cdafb[m HEAD@{3}: commit: finalizado (amem)
+[33m7ef11b7[m HEAD@{4}: commit (merge): t0 funcional
+[33m0bd0269[m HEAD@{5}: commit: t0 funcional
+[33mfade609[m HEAD@{6}: commit: agr na branch certa
+[33m15252da[m HEAD@{7}: commit (merge): ...
+[33mb98a81a[m HEAD@{8}: checkout: moving from main to corlete
+[33m1778d87[m[33m ([m[1;32mmain[m[33m)[m HEAD@{9}: checkout: moving from corlete to main
+[33mb98a81a[m HEAD@{10}: checkout: moving from main to corlete
+[33m1778d87[m[33m ([m[1;32mmain[m[33m)[m HEAD@{11}: checkout: moving from corlete to main
+[33mb98a81a[m HEAD@{12}: commit: esqueci de mudar de branch
+[33m24762cb[m HEAD@{13}: checkout: moving from main to corlete
+[33m1778d87[m[33m ([m[1;32mmain[m[33m)[m HEAD@{14}: commit: esqueci de mudar de branch
+[33m850ffce[m HEAD@{15}: commit: atualizacao casos teste
+[33m9b3eb65[m HEAD@{16}: checkout: moving from corlete to main
+[33m24762cb[m HEAD@{17}: checkout: moving from main to corlete
+[33m9b3eb65[m HEAD@{18}: checkout: moving from corlete to main
+[33m24762cb[m HEAD@{19}: commit: -
+[33m9b3eb65[m HEAD@{20}: pull origin main: Fast-forward
+[33m09c5f58[m HEAD@{21}: checkout: moving from main to corlete
+[33m9b3eb65[m HEAD@{22}: commit: organizando o dir
+[33m09c5f58[m HEAD@{23}: commit: first commit
+[33m2a09821[m HEAD@{24}: Branch: renamed refs/heads/master to refs/heads/main
+[33m2a09821[m HEAD@{26}: commit (initial): first commit

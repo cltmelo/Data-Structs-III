@@ -38,6 +38,9 @@ void dfsComponentes(Grafo* gr, int vert, int* visitado, int componente);
 
 void componentesFortementeConexos(Grafo* gr);
 
+int dfsOrdemTermino(Grafo* gr, int vert, int* visitado, int* pilha, int* tempo);
+Grafo*  geraTransposto(Grafo* gr);
+
 
 //=====================================================================================================================
 // TENATIVA DA FUNCIONALIDADE 12
